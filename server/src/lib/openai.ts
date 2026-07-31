@@ -97,14 +97,14 @@ export async function ingestPdfToVectorStore(
 
   // 1. Subir el archivo a OpenAI Files
   const file = await openai.files.create({
-    file: new File([fileBuffer], filename, { type: 'application/pdf' }),
+    file: new File([new Uint8Array(fileBuffer)], filename, { type: 'application/pdf' }),
     purpose: 'assistants',
   });
 
   // 2. Agregar al vector store
-  await openai.beta.vectorStores.files.create(vectorStoreId, {
-    file_id: file.id,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const vsApi = ((openai as any).vectorStores ?? (openai.beta as any).vectorStores);
+  await vsApi.files.create(vectorStoreId, { file_id: file.id });
 
   return file.id;
 }

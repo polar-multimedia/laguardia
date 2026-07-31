@@ -2,7 +2,7 @@
  * Fuente ÚNICA de metadatos del corpus.
  * Lee corpus-registry.json — ningún otro módulo duplica estos datos.
  */
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -62,7 +62,6 @@ export function updateFileId(filename: string, fileId: string): void {
   const entry = registry.find(e => e.filename === filename);
   if (entry) {
     entry.file_id = fileId;
-    const { writeFileSync } = await import('fs').then(m => m);
     writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf-8');
     _cache = null; // invalidate
   }
