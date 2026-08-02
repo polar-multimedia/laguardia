@@ -70,6 +70,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
               },
               output: {
                 format: 'pcm16',
+                voice: 'shimmer',
               },
             },
           },
