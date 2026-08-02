@@ -54,6 +54,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
         JSON.stringify({
           type: 'session.update',
           session: {
+            type: 'realtime',
             modalities: ['text', 'audio'],
             instructions: CLARA_SYSTEM_PROMPT,
             voice: 'shimmer', // Cambiar a 'marin' cuando esté disponible en tu cuenta
