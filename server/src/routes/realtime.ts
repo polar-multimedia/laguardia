@@ -56,9 +56,10 @@ export function attachRealtimeProxy(httpServer: Server): void {
           session: {
             type: 'realtime',
             instructions: CLARA_SYSTEM_PROMPT,
+            output_modalities: ['audio'],
             audio: {
               input: {
-                format: 'pcm16',
+                format: { type: 'audio/pcm', rate: 24000 },
                 transcription: { model: 'whisper-1' },
                 turn_detection: {
                   type: 'server_vad',
@@ -68,7 +69,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
                 },
               },
               output: {
-                format: 'pcm16',
+                format: { type: 'audio/pcm' },
                 voice: 'shimmer',
               },
             },
