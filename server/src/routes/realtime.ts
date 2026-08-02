@@ -55,17 +55,22 @@ export function attachRealtimeProxy(httpServer: Server): void {
           type: 'session.update',
           session: {
             type: 'realtime',
-            modalities: ['text', 'audio'],
             instructions: CLARA_SYSTEM_PROMPT,
-            voice: 'shimmer', // Cambiar a 'marin' cuando esté disponible en tu cuenta
-            input_audio_format: 'pcm16',
-            output_audio_format: 'pcm16',
-            input_audio_transcription: { model: 'whisper-1' },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 600,
+            voice: 'shimmer',
+            audio: {
+              input: {
+                format: 'pcm16',
+                transcription: { model: 'whisper-1' },
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: 0.5,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: 600,
+                },
+              },
+              output: {
+                format: 'pcm16',
+              },
             },
           },
         }),
