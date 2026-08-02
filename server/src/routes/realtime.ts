@@ -81,6 +81,10 @@ export function attachRealtimeProxy(httpServer: Server): void {
         return;
       }
 
+      if (event.type === "error") {
+        console.error("[Realtime] Error OpenAI detail:", JSON.stringify(event));
+      }
+
       // ── Reenviar evento al cliente (pass-through) ──────────────
       if (clientWs.readyState === WebSocket.OPEN) {
         clientWs.send(raw);
