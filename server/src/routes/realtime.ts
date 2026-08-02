@@ -56,7 +56,6 @@ export function attachRealtimeProxy(httpServer: Server): void {
           session: {
             type: 'realtime',
             instructions: CLARA_SYSTEM_PROMPT,
-            voice: 'shimmer',
             audio: {
               input: {
                 format: 'pcm16',
