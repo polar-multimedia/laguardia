@@ -41,8 +41,6 @@ export function useRealtimeSession(): UseRealtimeSession {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const playQueueRef = useRef<Float32Array[]>([]);
-  const isPlayingRef = useRef(false);
   const nextPlayTimeRef = useRef(0);
 
   const [status, setStatus] = useState<SessionStatus>('disconnected');
