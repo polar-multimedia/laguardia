@@ -14,7 +14,7 @@ import { createSession, logConversationTurn } from '../db/queries.js';
 import type { EvidenceItem } from '../lib/openai.js';
 
 const OPENAI_REALTIME_URL =
-  'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview';
+  'wss://api.openai.com/v1/realtime?model=gpt-realtime';
 
 export function attachRealtimeProxy(httpServer: Server): void {
   const wss = new WebSocketServer({ server: httpServer, path: '/api/realtime' });
