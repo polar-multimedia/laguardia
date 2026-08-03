@@ -53,10 +53,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
           session: {
             type: 'realtime',
             instructions: CLARA_SYSTEM_PROMPT,
-            output_modalities: ['audio'],
-            input_audio_transcription: {
-              model: 'whisper-1',
-            },
+            output_modalities: ['audio', 'text'],
             audio: {
               input: {
                 format: { type: 'audio/pcm', rate: 24000 },
@@ -99,44 +96,42 @@ export function attachRealtimeProxy(httpServer: Server): void {
         clientWs.send(raw);
       }
 
-      // ── Transcripción del usuario → búsqueda en corpus ─────────
-      if (event.type === 'conversation.item.input_audio_transcription.completed') {
-        userTranscript = event.transcript ?? '';
-        console.log('[Realtime] Transcripción:', userTranscript.slice(0, 80));
-
-        searchCorpus(userTranscript)
-          .then(({ evidence, formalResponse }) => {
-            lastEvidence = evidence;
-            if ((evidence.length > 0 || formalResponse) && clientWs.readyState === WebSocket.OPEN) {
-              safeSend(clientWs, {
-                type: 'clara.evidence',
-                evidence,
-                formalResponse,
-              });
-            }
-          })
-          .catch((err) => console.error('[Realtime] searchCorpus error:', err));
-      }
-
-      // ── Capturar respuesta de texto de Clara (para logging) ────
+      // ── Capturar respuesta de texto de Clara ──────────────────
       if (event.type === 'response.text.delta') {
         claraResponse += event.delta ?? '';
       }
 
-      // ── Fin de turno: logging ──────────────────────────────────
+      // ── Fin de turno: buscar papers y logging ─────────────────
       if (event.type === 'response.done') {
-        if (userTranscript) {
+        const responseText = claraResponse;
+        claraResponse = '';
+        userTranscript = '';
+
+        if (responseText.trim().length > 20) {
+          // Buscar papers usando la respuesta de Clara como query
+          searchCorpus(responseText)
+            .then(({ evidence, formalResponse }) => {
+              lastEvidence = evidence;
+              if ((evidence.length > 0 || formalResponse) && clientWs.readyState === WebSocket.OPEN) {
+                safeSend(clientWs, {
+                  type: 'clara.evidence',
+                  evidence,
+                  formalResponse,
+                });
+              }
+            })
+            .catch((err) => console.error('[Realtime] searchCorpus error:', err));
+
           logConversationTurn({
             sessionId,
-            userTranscript,
-            claraResponse,
+            userTranscript: '',
+            claraResponse: responseText,
             citedPapers: lastEvidence,
             turnIndex,
           }).catch(console.error);
           turnIndex++;
         }
-        userTranscript = '';
-        claraResponse = '';
+
         lastEvidence = [];
       }
     });

@@ -39,47 +39,49 @@ export async function searchCorpus(query: string): Promise<CorpusSearchResult> {
   if (!query || query.trim().length < 5) return { evidence: [], formalResponse: '' };
 
   try {
-    const response = await openai.responses.create({
-      model: 'gpt-4.1',
-      input: `Eres la Dra. Clara Laguardia, especialista en inmunología clínica y asesora científica de Bacmune (MV130).
-
-Un médico pregunta: "${query}"
-
-Redacta una respuesta médica ESCRITA formal en español (2-4 párrafos) para mostrar en pantalla junto con las referencias:
-- Cita los estudios relevantes con autor y año dentro del texto
-- Incluye datos numéricos de eficacia cuando el corpus los aporte
-- Usa terminología científico-clínica precisa
-- Responde ÚNICAMENTE con información del corpus disponible
-- Si no hay evidencia suficiente para la pregunta, indícalo claramente`,
-      tools: [
-        {
-          type: 'file_search',
-          vector_store_ids: [VECTOR_STORE_ID()],
-          max_num_results: 6,
-        } as any,
-      ],
+    // Usar Assistants con file_search para buscar en el vector store
+    const assistant = await openai.beta.assistants.create({
+      model: 'gpt-4o',
+      instructions: `Eres Clara Laguardia, especialista en inmunología bacteriana y asesora científica de Bacmune (MV130).
+Tienes acceso a los artículos científicos del corpus de Bacmune.
+Redacta una respuesta médica formal escrita en español (2-4 párrafos) basándote EXCLUSIVAMENTE en los documentos del corpus.
+Cita autor y año dentro del texto. Incluye datos numéricos cuando el corpus los aporte.
+Al final de la respuesta, lista las referencias numeradas en formato: [N] Autor et al., Año - Título.`,
+      tools: [{ type: 'file_search' }],
+      tool_resources: {
+        file_search: { vector_store_ids: [VECTOR_STORE_ID()] },
+      },
     });
 
+    const thread = await openai.beta.threads.create({
+      messages: [{ role: 'user', content: query }],
+    });
+
+    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+      assistant_id: assistant.id,
+    });
+
+    if (run.status !== 'completed') {
+      console.error('[searchCorpus] Run status:', run.status);
+      return { evidence: [], formalResponse: '' };
+    }
+
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const lastMsg = messages.data[0];
     let rawText = '';
     const rawAnnotations: any[] = [];
 
-    // Extraer texto y anotaciones del output
-    for (const output of response.output ?? []) {
-      if (output.type === 'message' && output.content) {
-        for (const content of output.content) {
-          if (content.type === 'output_text') {
-            rawText = (content as any).text ?? '';
-            const anns = (content as any).annotations;
-            if (Array.isArray(anns)) rawAnnotations.push(...anns);
-          }
-        }
+    for (const block of lastMsg?.content ?? []) {
+      if (block.type === 'text') {
+        rawText = block.text.value;
+        rawAnnotations.push(...(block.text.annotations ?? []));
       }
     }
 
-    // Ordenar anotaciones de tipo file_citation por posición en el texto
+    // Ordenar anotaciones file_citation por índice
     const citations = rawAnnotations
       .filter((a: any) => a.type === 'file_citation')
-      .sort((a: any, b: any) => (a.index ?? 0) - (b.index ?? 0));
+      .sort((a: any, b: any) => (a.start_index ?? 0) - (b.start_index ?? 0));
 
     // Asignar número secuencial a cada file_id único
     const fileIdToNum = new Map<string, number>();
@@ -87,32 +89,39 @@ Redacta una respuesta médica ESCRITA formal en español (2-4 párrafos) para mo
     let counter = 0;
 
     for (const ann of citations) {
-      if (!fileIdToNum.has(ann.file_id)) {
-        const meta = findByFileId(ann.file_id);
-        if (!meta) continue;
-        const num = ++counter;
-        fileIdToNum.set(ann.file_id, num);
-        evidence.push({
-          file_id: ann.file_id,
-          title: meta.title,
-          authors: meta.authors,
-          year: meta.year,
-          filename: meta.filename,
-          snippet: ann.quote ?? '',
-          page: ann.page ?? null,
-          citationNumber: num,
-        });
-      }
+      const fid = ann.file_citation?.file_id;
+      if (!fid || fileIdToNum.has(fid)) continue;
+      const meta = findByFileId(fid);
+      if (!meta) continue;
+      const num = ++counter;
+      fileIdToNum.set(fid, num);
+      evidence.push({
+        file_id: fid,
+        title: meta.title,
+        authors: meta.authors,
+        year: meta.year,
+        filename: meta.filename,
+        snippet: ann.file_citation?.quote ?? '',
+        page: null,
+        citationNumber: num,
+      });
     }
 
-    // Reemplazar marcadores 【n:m†source】 con [N] en el texto
+    // Reemplazar marcadores 【...】 con [N]
     let citIdx = 0;
     const formalResponse = rawText.replace(/【[^】]+】/g, () => {
       const ann = citations[citIdx++];
       if (!ann) return '';
-      const num = fileIdToNum.get(ann.file_id);
+      const fid = ann.file_citation?.file_id;
+      const num = fid ? fileIdToNum.get(fid) : undefined;
       return num !== undefined ? `[${num}]` : '';
     });
+
+    // Limpiar el asistente y thread para no acumular costos
+    await Promise.all([
+      openai.beta.assistants.del(assistant.id),
+      openai.beta.threads.del(thread.id),
+    ]).catch(() => {});
 
     return { evidence, formalResponse };
   } catch (err) {

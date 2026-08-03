@@ -55,12 +55,6 @@ export default function App() {
         style={{ borderColor: 'rgba(30,42,63,0.6)', background: 'rgba(8,12,20,0.95)' }}
       >
         <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-            style={{ background: 'linear-gradient(135deg, #5b8dee, #8b5cf6)' }}
-          >
-            CL
-          </div>
           <div>
             <p className="text-sm font-semibold text-slate-200">Clara Laguardia</p>
             <p className="text-xs text-slate-500">Especialista en Inmunología Bacteriana · Bacmune MV130</p>
