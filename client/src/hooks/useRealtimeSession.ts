@@ -31,9 +31,11 @@ export interface UseRealtimeSession {
   avatarState: AvatarState;
   evidence: EvidenceItem[];
   transcript: string;
+  muted: boolean;
   connect: () => void;
   disconnect: () => void;
   clearEvidence: () => void;
+  toggleMute: () => void;
 }
 
 export function useRealtimeSession(): UseRealtimeSession {
@@ -42,11 +44,13 @@ export function useRealtimeSession(): UseRealtimeSession {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const nextPlayTimeRef = useRef(0);
+  const mutedRef = useRef(false); // ref para acceso sin stale closure
 
   const [status, setStatus] = useState<SessionStatus>('disconnected');
   const [avatarState, setAvatarState] = useState<AvatarState>('idle');
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [transcript, setTranscript] = useState('');
+  const [muted, setMuted] = useState(false);
 
   // ── Audio playback ─────────────────────────────────────────
   function enqueuePcm16(base64: string) {
@@ -83,12 +87,12 @@ export function useRealtimeSession(): UseRealtimeSession {
     nextPlayTimeRef.current = ctx.currentTime;
 
     const source = ctx.createMediaStreamSource(stream);
-    // ScriptProcessor deprecated but widely supported — AudioWorklet preferred for prod
     const processor = ctx.createScriptProcessor(4096, 1, 1);
     processorRef.current = processor;
 
     processor.onaudioprocess = (e) => {
       if (ws.readyState !== WebSocket.OPEN) return;
+      if (mutedRef.current) return; // silenciado: no enviar audio
       const float32 = e.inputBuffer.getChannelData(0);
       const int16 = new Int16Array(float32.length);
       for (let i = 0; i < float32.length; i++) {
@@ -103,7 +107,6 @@ export function useRealtimeSession(): UseRealtimeSession {
     };
 
     source.connect(processor);
-    // Conectar via gain silencioso para mantener el grafo activo sin loopback
     const silentGain = ctx.createGain();
     silentGain.gain.value = 0;
     processor.connect(silentGain);
@@ -119,49 +122,47 @@ export function useRealtimeSession(): UseRealtimeSession {
     audioCtxRef.current = null;
   }
 
+  // ── Toggle mute ────────────────────────────────────────────
+  const toggleMute = useCallback(() => {
+    mutedRef.current = !mutedRef.current;
+    setMuted(mutedRef.current);
+  }, []);
+
   // ── WebSocket event handling ───────────────────────────────
   function handleEvent(event: Record<string, any>) {
     switch (event.type) {
-      // Custom events from our proxy
       case 'clara.evidence':
         setEvidence(event.evidence as EvidenceItem[]);
         break;
 
       case 'clara.session_id':
-        console.log('[Realtime] Session ID:', event.sessionId);
         break;
 
-      // VAD: user started speaking
       case 'input_audio_buffer.speech_started':
         setAvatarState('listening');
-        setEvidence([]); // limpiar evidencia del turno anterior
+        setEvidence([]);
         break;
 
-      // VAD: user stopped speaking → Clara va a pensar
       case 'input_audio_buffer.speech_stopped':
         setAvatarState('thinking');
         break;
 
-      // Clara empieza a responder con audio
       case 'response.audio.delta':
       case 'response.output_audio.delta':
         setAvatarState('speaking');
         if (event.delta) enqueuePcm16(event.delta);
         break;
 
-      // Transcripción del usuario disponible
       case 'conversation.item.input_audio_transcription.completed':
         setTranscript(event.transcript ?? '');
         break;
 
-      // Clara terminó de responder
       case 'response.done': {
-        // Esperar a que todo el audio en cola termine de reproducirse antes de volver a idle
         const ctx = audioCtxRef.current;
         const remaining = ctx
           ? Math.max(0, nextPlayTimeRef.current - ctx.currentTime)
           : 0;
-        const delay = Math.round(remaining * 1000) + 300; // +300 ms de margen
+        const delay = Math.round(remaining * 1000) + 300;
         setTimeout(() => setAvatarState('idle'), delay);
         break;
       }
@@ -228,6 +229,8 @@ export function useRealtimeSession(): UseRealtimeSession {
       wsRef.current = null;
       setStatus('disconnected');
       setAvatarState('idle');
+      mutedRef.current = false;
+      setMuted(false);
     };
 
     ws.onerror = () => {
@@ -241,7 +244,6 @@ export function useRealtimeSession(): UseRealtimeSession {
 
   const clearEvidence = useCallback(() => setEvidence([]), []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       wsRef.current?.close();
@@ -249,5 +251,5 @@ export function useRealtimeSession(): UseRealtimeSession {
     };
   }, []);
 
-  return { status, avatarState, evidence, transcript, connect, disconnect, clearEvidence };
+  return { status, avatarState, evidence, transcript, muted, connect, disconnect, clearEvidence, toggleMute };
 }
