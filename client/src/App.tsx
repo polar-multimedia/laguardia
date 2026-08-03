@@ -1,10 +1,14 @@
 /**
  * Pantalla principal de Clara-Laguardia26.
  *
- * Layout de dos columnas:
- * ┌─────────────────────┬──────────────────────────────┐
- * │   Avatar + controles│   Panel de evidencia / PDF   │
- * └─────────────────────┴──────────────────────────────┘
+ * Layout columna única centrada:
+ * ┌──────────────────────┐
+ * │       Avatar         │
+ * ├──────────────────────┤
+ * │   Evidence widget    │  ← aparece debajo del avatar cuando hay papers
+ * ├──────────────────────┤
+ * │  Transcript · Botón  │
+ * └──────────────────────┘
  */
 import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { Avatar } from './components/Avatar';
@@ -25,8 +29,6 @@ export default function App() {
     toggleMute,
   } = useRealtimeSession();
 
-  const hasEvidence = evidence.length > 0;
-
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
 
@@ -43,19 +45,14 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Botón de mute — visible sólo cuando la sesión está activa */}
           {status === 'ready' && (
             <button
               onClick={toggleMute}
               title={isMuted ? 'Activar micrófono' : 'Silenciar micrófono'}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
-                background: isMuted
-                  ? 'rgba(239, 68, 68, 0.15)'
-                  : 'rgba(255,255,255,0.05)',
-                border: isMuted
-                  ? '1px solid rgba(239, 68, 68, 0.4)'
-                  : '1px solid rgba(255,255,255,0.08)',
+                background: isMuted ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.05)',
+                border: isMuted ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(255,255,255,0.08)',
                 color: isMuted ? '#ef4444' : '#94a3b8',
               }}
             >
@@ -63,7 +60,6 @@ export default function App() {
               <span>{isMuted ? 'Muteado' : 'Mute'}</span>
             </button>
           )}
-
           {status === 'ready' && (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -73,28 +69,31 @@ export default function App() {
         </div>
       </header>
 
-      {/* ── Main content ─────────────────────────────────────────── */}
-      <main className="flex-1 flex overflow-hidden">
+      {/* ── Main content — columna única centrada ─────────────────── */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="flex flex-col items-center px-4 py-6 gap-4 mx-auto" style={{ maxWidth: '480px' }}>
 
-        {/* Columna izquierda: Avatar */}
-        <div
-          className="flex flex-col items-center justify-between p-6 flex-shrink-0"
-          style={{ width: hasEvidence ? '420px' : '100%', maxWidth: hasEvidence ? '420px' : '520px', margin: '0 auto' }}
-        >
           {/* Avatar */}
           <div
             className={`w-full rounded-2xl overflow-hidden transition-all duration-300 ${
               avatarState !== 'idle' ? 'avatar-ring-active' : 'avatar-ring'
             }`}
-            style={{ aspectRatio: '3/4', maxHeight: '520px' }}
+            style={{ aspectRatio: '3/4', maxHeight: '460px' }}
           >
             <Avatar state={avatarState} className="w-full h-full" />
           </div>
 
+          {/* Widget de evidencia — debajo del avatar */}
+          {evidence.length > 0 && (
+            <div className="w-full">
+              <EvidenceWidget evidence={evidence} onClose={clearEvidence} />
+            </div>
+          )}
+
           {/* Transcript del usuario */}
           {transcript && (
             <div
-              className="w-full mt-4 px-4 py-3 rounded-xl text-sm text-slate-300 italic"
+              className="w-full px-4 py-3 rounded-xl text-sm text-slate-300 italic"
               style={{
                 background: 'rgba(91,141,238,0.06)',
                 border: '1px solid rgba(91,141,238,0.15)',
@@ -105,37 +104,20 @@ export default function App() {
           )}
 
           {/* Botón de voz */}
-          <div className="mt-6">
-            <VoiceButton
-              status={status}
-              onConnect={connect}
-              onDisconnect={disconnect}
-            />
-          </div>
+          <VoiceButton
+            status={status}
+            onConnect={connect}
+            onDisconnect={disconnect}
+          />
 
           {status === 'disconnected' && (
-            <p className="mt-4 text-xs text-center text-slate-600 max-w-xs">
+            <p className="text-xs text-center text-slate-600 max-w-xs">
               Haz clic para iniciar la sesión de voz. Clara responderá basándose
               exclusivamente en los 20 estudios clínicos aprobados de Bacmune/MV130.
             </p>
           )}
+
         </div>
-
-        {/* Columna derecha: Evidence panel */}
-        {hasEvidence && (
-          <div
-            className="flex-1 border-l overflow-hidden flex flex-col"
-            style={{ borderColor: 'rgba(30,42,63,0.6)' }}
-          >
-            <div className="flex-1 overflow-y-auto p-5">
-              <EvidenceWidget
-                evidence={evidence}
-                onClose={clearEvidence}
-              />
-            </div>
-          </div>
-        )}
-
       </main>
     </div>
   );
