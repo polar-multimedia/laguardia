@@ -6,6 +6,3 @@ dist/
 .DS_Store
 .vercel
 .railway
-
-# PDFs del corpus — se sirven desde Railway, no van a git
-server/public/pdf/

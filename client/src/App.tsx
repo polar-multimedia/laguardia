@@ -35,7 +35,7 @@ export default function App() {
       {/* ── Top bar ─────────────────────────────────────────────── */}
       <header
         className="flex items-center justify-between px-6 py-4 border-b flex-shrink-0"
-        style={{ borderColor: 'rgba(30,42,63,0.6)', background: 'rgba(8,12,20,0.95)' }}
+        style={{ borderColor: 'rgba(54,54,59,0.6)', background: 'rgba(17,17,19,0.95)' }}
       >
         <div className="flex items-center gap-3">
           <div>

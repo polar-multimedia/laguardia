@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --bg: #0a1628;
-    --surface: #0f1e36;
-    --surface2: #162440;
-    --border: #1e3158;
+    --bg: #111113;
+    --surface: #1c1c1f;
+    --surface2: #252528;
+    --border: #36363b;
     --accent: #5b8dee;
     --accent2: #8b5cf6;
     --text: #e2e8f0;

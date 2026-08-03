@@ -64,7 +64,7 @@ export function Avatar({ state, className = '' }: AvatarProps) {
   const speakSrc  = SPEAK_LOOPS[speakIdx  % SPEAK_LOOPS.length];
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl bg-[#0a0f1a] ${className}`}>
+    <div className={`relative overflow-hidden rounded-2xl bg-[#111113] ${className}`}>
 
       {/* ── Capa base: listen loop ─────────────────────────── */}
       <video
@@ -119,7 +119,7 @@ export function Avatar({ state, className = '' }: AvatarProps) {
       <div
         className="absolute bottom-0 left-0 right-0 h-24"
         style={{
-          background: 'linear-gradient(to top, rgba(8,12,20,0.9) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(17,17,19,0.9) 0%, transparent 100%)',
           pointerEvents: 'none',
         }}
       />
