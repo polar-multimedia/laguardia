@@ -14,7 +14,7 @@ import { createSession, logConversationTurn } from '../db/queries.js';
 import type { EvidenceItem } from '../lib/openai.js';
 
 const OPENAI_REALTIME_URL =
-  'wss://api.openai.com/v1/realtime?model=gpt-realtime';
+  'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview';
 
 export function attachRealtimeProxy(httpServer: Server): void {
   const wss = new WebSocketServer({ server: httpServer, path: '/api/realtime' });
@@ -24,7 +24,6 @@ export function attachRealtimeProxy(httpServer: Server): void {
 
     let sessionId: string;
     let openaiWs: WebSocket | null = null;
-    let userTranscript = '';
     let claraResponse = '';
     let lastEvidence: EvidenceItem[] = [];
     let turnIndex = 0;
@@ -41,33 +40,28 @@ export function attachRealtimeProxy(httpServer: Server): void {
     openaiWs = new WebSocket(OPENAI_REALTIME_URL, {
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        'OpenAI-Beta': 'realtime=v1',
       },
     });
 
     openaiWs.on('open', () => {
       console.log('[Realtime] Conectado a OpenAI Realtime');
 
+      // Formato estándar de la Realtime API — garantiza que instructions se apliquen
       openaiWs!.send(
         JSON.stringify({
           type: 'session.update',
           session: {
-            type: 'realtime',
+            modalities: ['text', 'audio'],
             instructions: CLARA_SYSTEM_PROMPT,
-            output_modalities: ['audio', 'text'],
-            audio: {
-              input: {
-                format: { type: 'audio/pcm', rate: 24000 },
-                turn_detection: {
-                  type: 'server_vad',
-                  threshold: 0.5,
-                  prefix_padding_ms: 300,
-                  silence_duration_ms: 600,
-                },
-              },
-              output: {
-                format: { type: 'audio/pcm', rate: 24000 },
-                voice: 'shimmer',
-              },
+            voice: 'shimmer',
+            input_audio_format: 'pcm16',
+            output_audio_format: 'pcm16',
+            turn_detection: {
+              type: 'server_vad',
+              threshold: 0.5,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 600,
             },
           },
         }),
@@ -105,7 +99,6 @@ export function attachRealtimeProxy(httpServer: Server): void {
       if (event.type === 'response.done') {
         const responseText = claraResponse;
         claraResponse = '';
-        userTranscript = '';
 
         if (responseText.trim().length > 20) {
           // Buscar papers usando la respuesta de Clara como query
