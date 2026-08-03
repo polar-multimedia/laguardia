@@ -187,6 +187,7 @@ export function useRealtimeSession(): UseRealtimeSession {
     ws.onmessage = (msg) => {
       try {
         const event = JSON.parse(msg.data);
+        console.log('[DEBUG] Event:', event.type);
         handleEvent(event);
       } catch {
         // ignore parse errors
