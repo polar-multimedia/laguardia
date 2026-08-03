@@ -16,7 +16,6 @@ export interface CorpusEntry {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// __dirname en Railway = /app/dist/lib  →  ../../ llega a /app/corpus-registry.json
 const REGISTRY_PATH = path.join(__dirname, '../../corpus-registry.json');
 
 let _cache: CorpusEntry[] | null = null;
@@ -37,11 +36,8 @@ export function findByFileId(fileId: string): CorpusEntry | undefined {
   return getRegistry().find(e => e.file_id === fileId);
 }
 
-/** Busca por nombre de archivo normalizando Unicode (NFC) para evitar
- *  diferencias entre nombres de macOS (NFD) y el JSON del registry (NFC). */
 export function findByFilename(filename: string): CorpusEntry | undefined {
-  const nfc = filename.normalize('NFC');
-  return getRegistry().find(e => e.filename.normalize('NFC') === nfc);
+  return getRegistry().find(e => e.filename === filename);
 }
 
 export function getStats() {
@@ -63,8 +59,7 @@ export function getStats() {
 /** Actualiza el file_id de una entrada y persiste el registry. */
 export function updateFileId(filename: string, fileId: string): void {
   const registry = getRegistry();
-  const nfc = filename.normalize('NFC');
-  const entry = registry.find(e => e.filename.normalize('NFC') === nfc);
+  const entry = registry.find(e => e.filename === filename);
   if (entry) {
     entry.file_id = fileId;
     writeFileSync(REGISTRY_PATH, JSON.stringify(registry, null, 2), 'utf-8');
