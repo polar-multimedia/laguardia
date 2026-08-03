@@ -7,6 +7,7 @@
  * - Recibir audio TTS de Clara y reproducirlo
  * - Detectar eventos de OpenAI Realtime y actualizar el estado del avatar
  * - Recibir evidencia (clara.evidence) y exponerla al componente
+ * - Botón de mute: silencia el micrófono sin cortar la sesión
  */
 import { useRef, useState, useCallback, useEffect } from 'react';
 import type { AvatarState } from './useAvatarState';
@@ -31,9 +32,11 @@ export interface UseRealtimeSession {
   avatarState: AvatarState;
   evidence: EvidenceItem[];
   transcript: string;
+  isMuted: boolean;
   connect: () => void;
   disconnect: () => void;
   clearEvidence: () => void;
+  toggleMute: () => void;
 }
 
 export function useRealtimeSession(): UseRealtimeSession {
@@ -42,11 +45,13 @@ export function useRealtimeSession(): UseRealtimeSession {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const nextPlayTimeRef = useRef(0);
+  const isMutedRef = useRef(false); // ref para el callback de audio (sin re-render)
 
   const [status, setStatus] = useState<SessionStatus>('disconnected');
   const [avatarState, setAvatarState] = useState<AvatarState>('idle');
   const [evidence, setEvidence] = useState<EvidenceItem[]>([]);
   const [transcript, setTranscript] = useState('');
+  const [isMuted, setIsMuted] = useState(false);
 
   // ── Audio playback ─────────────────────────────────────────
   function enqueuePcm16(base64: string) {
@@ -83,12 +88,16 @@ export function useRealtimeSession(): UseRealtimeSession {
     nextPlayTimeRef.current = ctx.currentTime;
 
     const source = ctx.createMediaStreamSource(stream);
-    // ScriptProcessor deprecated but widely supported — AudioWorklet preferred for prod
+    // ScriptProcessor deprecated pero ampliamente soportado
     const processor = ctx.createScriptProcessor(4096, 1, 1);
     processorRef.current = processor;
 
     processor.onaudioprocess = (e) => {
       if (ws.readyState !== WebSocket.OPEN) return;
+      // Si está muteado, enviar silencio para mantener la sesión viva
+      // pero no transmitir el audio del micrófono
+      if (isMutedRef.current) return;
+
       const float32 = e.inputBuffer.getChannelData(0);
       const int16 = new Int16Array(float32.length);
       for (let i = 0; i < float32.length; i++) {
@@ -154,11 +163,17 @@ export function useRealtimeSession(): UseRealtimeSession {
         setTranscript(event.transcript ?? '');
         break;
 
-      // Clara terminó de responder
-      case 'response.done':
-        // Pequeño delay para que el audio termine de reproducirse
-        setTimeout(() => setAvatarState('idle'), 500);
+      // Clara terminó de enviar datos — esperar a que termine el audio en cola
+      case 'response.done': {
+        const ctx = audioCtxRef.current;
+        let delayMs = 500;
+        if (ctx && nextPlayTimeRef.current > ctx.currentTime) {
+          // Calcular cuánto falta para que termine el audio en reproducción
+          delayMs = (nextPlayTimeRef.current - ctx.currentTime) * 1000 + 300;
+        }
+        setTimeout(() => setAvatarState('idle'), delayMs);
         break;
+      }
 
       case 'session.created':
         setStatus('ready');
@@ -223,6 +238,9 @@ export function useRealtimeSession(): UseRealtimeSession {
       wsRef.current = null;
       setStatus('disconnected');
       setAvatarState('idle');
+      // Resetear mute al desconectar
+      isMutedRef.current = false;
+      setIsMuted(false);
     };
 
     ws.onerror = () => {
@@ -236,6 +254,12 @@ export function useRealtimeSession(): UseRealtimeSession {
 
   const clearEvidence = useCallback(() => setEvidence([]), []);
 
+  const toggleMute = useCallback(() => {
+    const next = !isMutedRef.current;
+    isMutedRef.current = next;
+    setIsMuted(next);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -244,5 +268,5 @@ export function useRealtimeSession(): UseRealtimeSession {
     };
   }, []);
 
-  return { status, avatarState, evidence, transcript, connect, disconnect, clearEvidence };
+  return { status, avatarState, evidence, transcript, isMuted, connect, disconnect, clearEvidence, toggleMute };
 }

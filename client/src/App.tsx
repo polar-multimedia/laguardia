@@ -10,6 +10,7 @@ import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { Avatar } from './components/Avatar';
 import { VoiceButton } from './components/VoiceButton';
 import { EvidenceWidget } from './components/EvidenceWidget';
+import { Mic, MicOff } from 'lucide-react';
 
 export default function App() {
   const {
@@ -17,9 +18,11 @@ export default function App() {
     avatarState,
     evidence,
     transcript,
+    isMuted,
     connect,
     disconnect,
     clearEvidence,
+    toggleMute,
   } = useRealtimeSession();
 
   const hasEvidence = evidence.length > 0;
@@ -39,7 +42,28 @@ export default function App() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Botón de mute — visible sólo cuando la sesión está activa */}
+          {status === 'ready' && (
+            <button
+              onClick={toggleMute}
+              title={isMuted ? 'Activar micrófono' : 'Silenciar micrófono'}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{
+                background: isMuted
+                  ? 'rgba(239, 68, 68, 0.15)'
+                  : 'rgba(255,255,255,0.05)',
+                border: isMuted
+                  ? '1px solid rgba(239, 68, 68, 0.4)'
+                  : '1px solid rgba(255,255,255,0.08)',
+                color: isMuted ? '#ef4444' : '#94a3b8',
+              }}
+            >
+              {isMuted ? <MicOff size={13} /> : <Mic size={13} />}
+              <span>{isMuted ? 'Muteado' : 'Mute'}</span>
+            </button>
+          )}
+
           {status === 'ready' && (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
