@@ -35,16 +35,22 @@ export function Avatar({ state, className = '' }: AvatarProps) {
   const [speakIdx,  setSpeakIdx]  = useState(0);
   const [thinkVisible, setThinkVisible] = useState(false);
   const [speakVisible, setSpeakVisible] = useState(false);
+  // Contadores de generación: al incrementar se fuerza remount del <video>
+  // para que autoPlay funcione aunque el elemento anterior hubiera terminado (.ended)
+  const [speakKey, setSpeakKey] = useState(0);
+  const [thinkKey, setThinkKey] = useState(0);
 
   // Controlar visibilidad de capas según estado
   useEffect(() => {
     if (state === 'thinking') {
       setSpeakVisible(false);
       setThinkIdx(0);
+      setThinkKey(k => k + 1); // fuerza remount del video
       setThinkVisible(true);
     } else if (state === 'speaking') {
       setThinkVisible(false);
       setSpeakIdx(0);
+      setSpeakKey(k => k + 1); // fuerza remount del video
       setSpeakVisible(true);
     } else {
       // idle o listening: solo capa base
@@ -73,7 +79,7 @@ export function Avatar({ state, className = '' }: AvatarProps) {
 
       {/* ── Capa media: think loop con fade ────────────────── */}
       <video
-        key={thinkSrc}
+        key={`think-${thinkKey}-${thinkSrc}`}
         src={thinkSrc}
         autoPlay
         muted
@@ -92,7 +98,7 @@ export function Avatar({ state, className = '' }: AvatarProps) {
 
       {/* ── Capa top: speak loop con fade ──────────────────── */}
       <video
-        key={speakSrc}
+        key={`speak-${speakKey}-${speakSrc}`}
         src={speakSrc}
         autoPlay
         muted
