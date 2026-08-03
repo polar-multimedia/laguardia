@@ -60,7 +60,6 @@ export function attachRealtimeProxy(httpServer: Server): void {
             audio: {
               input: {
                 format: { type: 'audio/pcm', rate: 24000 },
-                transcription: { model: 'whisper-1' },
                 turn_detection: {
                   type: 'server_vad',
                   threshold: 0.5,
