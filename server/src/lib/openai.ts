@@ -22,72 +22,115 @@ export interface EvidenceItem {
   filename: string;
   snippet: string;
   page: number | null;
+  citationNumber: number;
+}
+
+export interface CorpusSearchResult {
+  evidence: EvidenceItem[];
+  formalResponse: string;
 }
 
 /**
  * Busca evidencia en el corpus científico de Bacmune usando file_search.
+ * Devuelve una respuesta formal escrita + la lista de papers citados.
  * Se llama en paralelo al Realtime, sin bloquear la respuesta de voz.
  */
-export async function searchCorpus(query: string): Promise<EvidenceItem[]> {
-  if (!query || query.trim().length < 5) return [];
+export async function searchCorpus(query: string): Promise<CorpusSearchResult> {
+  if (!query || query.trim().length < 5) return { evidence: [], formalResponse: '' };
 
   try {
-    const response = await openai.responses.create({
-      model: 'gpt-4.1',
-      input: `Eres un asistente de búsqueda de evidencia científica sobre Bacmune/MV130.
-Busca en el corpus los fragmentos más relevantes para esta consulta médica: "${query}"
-Devuelve solo la información más relevante con citas precisas.`,
-      tools: [
-        {
-          type: 'file_search',
-          vector_store_ids: [VECTOR_STORE_ID()],
-          max_num_results: 5,
-        } as any,
-      ],
+    const assistant = await openai.beta.assistants.create({
+      model: 'gpt-4o',
+      instructions: `Eres Clara Laguardia, especialista en inmunología bacteriana y asesora científica de Bacmune (MV130).
+Tienes acceso a los artículos científicos del corpus de Bacmune.
+Redacta una respuesta médica formal escrita en español (2-4 párrafos) basándote EXCLUSIVAMENTE en los documentos del corpus.
+Cita autor y año dentro del texto. Incluye datos numéricos cuando el corpus los aporte.
+Al final de la respuesta, lista las referencias numeradas en formato: [N] Autor et al., Año - Título.`,
+      tools: [{ type: 'file_search' }],
+      tool_resources: {
+        file_search: { vector_store_ids: [VECTOR_STORE_ID()] },
+      },
     });
 
-    const evidence: EvidenceItem[] = [];
+    const thread = await openai.beta.threads.create({
+      messages: [{ role: 'user', content: query }],
+    });
 
-    for (const output of response.output ?? []) {
-      if (output.type === 'message' && output.content) {
-        for (const content of output.content) {
-          if (content.type === 'output_text' && content.annotations) {
-            for (const ann of content.annotations) {
-              if ((ann as any).type === 'file_citation') {
-                const a = ann as any;
-                const meta = findByFileId(a.file_id);
-                if (!meta) continue;
+    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
+      assistant_id: assistant.id,
+    });
 
-                // Evitar duplicados del mismo paper
-                const already = evidence.find(e => e.file_id === a.file_id);
-                if (already) continue;
+    if (run.status !== 'completed') {
+      console.error('[searchCorpus] Run status:', run.status);
+      return { evidence: [], formalResponse: '' };
+    }
 
-                evidence.push({
-                  file_id: a.file_id,
-                  title: meta.title,
-                  authors: meta.authors,
-                  year: meta.year,
-                  filename: meta.filename,
-                  snippet: a.quote ?? '',
-                  page: a.page ?? null,
-                });
-              }
-            }
-          }
-        }
+    const messages = await openai.beta.threads.messages.list(thread.id);
+    const lastMsg = messages.data[0];
+    let rawText = '';
+    const rawAnnotations: any[] = [];
+
+    for (const block of lastMsg?.content ?? []) {
+      if (block.type === 'text') {
+        rawText = block.text.value;
+        rawAnnotations.push(...(block.text.annotations ?? []));
       }
     }
 
-    return evidence;
+    // Ordenar anotaciones file_citation por índice
+    const citations = rawAnnotations
+      .filter((a: any) => a.type === 'file_citation')
+      .sort((a: any, b: any) => (a.start_index ?? 0) - (b.start_index ?? 0));
+
+    // Asignar número secuencial a cada file_id único
+    const fileIdToNum = new Map<string, number>();
+    const evidence: EvidenceItem[] = [];
+    let counter = 0;
+
+    for (const ann of citations) {
+      const fid = ann.file_citation?.file_id;
+      if (!fid || fileIdToNum.has(fid)) continue;
+      const meta = findByFileId(fid);
+      if (!meta) continue;
+      const num = ++counter;
+      fileIdToNum.set(fid, num);
+      evidence.push({
+        file_id: fid,
+        title: meta.title,
+        authors: meta.authors,
+        year: meta.year,
+        filename: meta.filename,
+        snippet: ann.file_citation?.quote ?? '',
+        page: null,
+        citationNumber: num,
+      });
+    }
+
+    // Reemplazar marcadores 【...】 con [N]
+    let citIdx = 0;
+    const formalResponse = rawText.replace(/【[^】]+】/g, () => {
+      const ann = citations[citIdx++];
+      if (!ann) return '';
+      const fid = ann.file_citation?.file_id;
+      const num = fid ? fileIdToNum.get(fid) : undefined;
+      return num !== undefined ? `[${num}]` : '';
+    });
+
+    // Limpiar asistente y thread para no acumular costos
+    await Promise.all([
+      openai.beta.assistants.del(assistant.id),
+      openai.beta.threads.del(thread.id),
+    ]).catch(() => {});
+
+    return { evidence, formalResponse };
   } catch (err) {
     console.error('[searchCorpus] Error:', err);
-    return [];
+    return { evidence: [], formalResponse: '' };
   }
 }
 
 /**
  * Ingesta un PDF al vector store de OpenAI.
- * Devuelve el file_id asignado.
  */
 export async function ingestPdfToVectorStore(
   fileBuffer: Buffer,
@@ -95,14 +138,11 @@ export async function ingestPdfToVectorStore(
 ): Promise<string> {
   const vectorStoreId = VECTOR_STORE_ID();
 
-  // 1. Subir el archivo a OpenAI Files
   const file = await openai.files.create({
     file: new File([new Uint8Array(fileBuffer)], filename, { type: 'application/pdf' }),
     purpose: 'assistants',
   });
 
-  // 2. Agregar al vector store
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const vsApi = ((openai as any).vectorStores ?? (openai.beta as any).vectorStores);
   await vsApi.files.create(vectorStoreId, { file_id: file.id });
 
