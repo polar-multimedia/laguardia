@@ -1,18 +1,22 @@
 /**
- * Componente Avatar de Clara.
- * Reproduce loops de video según el estado de la conversación.
- * Transición suave entre estados con fade-in/out.
+ * Avatar de Clara — dos capas de video.
+ * Capa base  : listen loop, siempre activa.
+ * Capa top   : speak loop, fade-in/out suave al hablar.
  */
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { AvatarState } from '../hooks/useAvatarState';
 
-// Rutas de los loops de video (servidos desde /avatar-loops/)
-const LOOPS: Record<AvatarState, string[]> = {
-  idle:      ['/avatar-loops/listen-1.mp4'],
-  listening: ['/avatar-loops/listen-1.mp4', '/avatar-loops/listen-2.mp4', '/avatar-loops/listen-3.mp4'],
-  thinking:  ['/avatar-loops/think-1.mp4', '/avatar-loops/think-2.mp4'],
-  speaking:  ['/avatar-loops/speak-1.mp4', '/avatar-loops/speak-2.mp4', '/avatar-loops/speak-3.mp4'],
-};
+const LISTEN_LOOPS = [
+  '/avatar-loops/listen-1.mp4',
+  '/avatar-loops/listen-2.mp4',
+  '/avatar-loops/listen-3.mp4',
+];
+
+const SPEAK_LOOPS = [
+  '/avatar-loops/speak-1.mp4',
+  '/avatar-loops/speak-2.mp4',
+  '/avatar-loops/speak-3.mp4',
+];
 
 interface AvatarProps {
   state: AvatarState;
@@ -20,51 +24,57 @@ interface AvatarProps {
 }
 
 export function Avatar({ state, className = '' }: AvatarProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [loopIdx, setLoopIdx] = useState(0);
-  const [opacity, setOpacity] = useState(1);
+  const [listenIdx, setListenIdx] = useState(0);
+  const [speakIdx,  setSpeakIdx]  = useState(0);
+  const [speakVisible, setSpeakVisible] = useState(false);
 
-  const videos = LOOPS[state];
-  const currentSrc = videos[loopIdx % videos.length];
-
-  // Al cambiar de estado, fade-out → cambiar video → fade-in
+  // Fade in al hablar, fade out al parar
   useEffect(() => {
-    setOpacity(0);
-    const t = setTimeout(() => {
-      setLoopIdx(0);
-      setOpacity(1);
-    }, 200);
-    return () => clearTimeout(t);
+    if (state === 'speaking') {
+      setSpeakIdx(0);
+      setSpeakVisible(true);
+    } else {
+      setSpeakVisible(false);
+    }
   }, [state]);
 
-  // Al terminar el video, avanzar al siguiente loop del mismo estado
-  function handleEnded() {
-    setLoopIdx((prev) => (prev + 1) % videos.length);
-  }
+  const listenSrc = LISTEN_LOOPS[listenIdx % LISTEN_LOOPS.length];
+  const speakSrc  = SPEAK_LOOPS[speakIdx % SPEAK_LOOPS.length];
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl bg-[#0a0f1a] ${className}`}
-      style={{ transition: 'box-shadow 0.4s ease' }}
-    >
+    <div className={`relative overflow-hidden rounded-2xl bg-[#0a0f1a] ${className}`}>
+
+      {/* ── Capa base: listen loop ─────────────────────────── */}
       <video
-        ref={videoRef}
-        key={currentSrc}
-        src={currentSrc}
+        key={listenSrc}
+        src={listenSrc}
         autoPlay
         muted
         playsInline
-        onEnded={handleEnded}
+        onEnded={() => setListenIdx(i => i + 1)}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+
+      {/* ── Capa top: speak loop con fade ──────────────────── */}
+      <video
+        key={speakSrc}
+        src={speakSrc}
+        autoPlay
+        muted
+        playsInline
+        onEnded={() => speakVisible && setSpeakIdx(i => i + 1)}
         style={{
+          position: 'absolute',
+          inset: 0,
           width: '100%',
           height: '100%',
           objectFit: 'cover',
-          opacity,
-          transition: 'opacity 0.2s ease',
+          opacity: speakVisible ? 1 : 0,
+          transition: 'opacity 0.5s ease',
         }}
       />
 
-      {/* Overlay con gradiente inferior */}
+      {/* ── Gradiente inferior ─────────────────────────────── */}
       <div
         className="absolute bottom-0 left-0 right-0 h-24"
         style={{
@@ -73,7 +83,7 @@ export function Avatar({ state, className = '' }: AvatarProps) {
         }}
       />
 
-      {/* Indicador de estado */}
+      {/* ── Indicador de estado ────────────────────────────── */}
       <div className="absolute bottom-4 left-4 flex items-center gap-2">
         <StateIndicator state={state} />
       </div>
