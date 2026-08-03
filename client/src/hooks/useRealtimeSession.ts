@@ -144,6 +144,7 @@ export function useRealtimeSession(): UseRealtimeSession {
 
       // Clara empieza a responder con audio
       case 'response.audio.delta':
+      case 'response.output_audio.delta':
         setAvatarState('speaking');
         if (event.delta) enqueuePcm16(event.delta);
         break;
