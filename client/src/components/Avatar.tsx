@@ -1,7 +1,8 @@
 /**
- * Avatar de Clara — dos capas de video.
- * Capa base  : listen loop, siempre activa.
- * Capa top   : speak loop, fade-in/out suave al hablar.
+ * Avatar de Clara — tres capas de video.
+ * Capa base   : listen loop, siempre activa.
+ * Capa think  : think loop, fade-in cuando Clara procesa.
+ * Capa speak  : speak loop, fade-in cuando Clara habla.
  */
 import { useEffect, useState } from 'react';
 import type { AvatarState } from '../hooks/useAvatarState';
@@ -10,6 +11,11 @@ const LISTEN_LOOPS = [
   '/avatar-loops/listen-1.mp4',
   '/avatar-loops/listen-2.mp4',
   '/avatar-loops/listen-3.mp4',
+];
+
+const THINK_LOOPS = [
+  '/avatar-loops/think-1.mp4',
+  '/avatar-loops/think-2.mp4',
 ];
 
 const SPEAK_LOOPS = [
@@ -25,23 +31,31 @@ interface AvatarProps {
 
 export function Avatar({ state, className = '' }: AvatarProps) {
   const [listenIdx, setListenIdx] = useState(0);
-  // speakVersion sube en cada turno de habla → fuerza remount del video → siempre empieza desde el inicio
-  const [speakVersion, setSpeakVersion] = useState(0);
+  const [thinkIdx,  setThinkIdx]  = useState(0);
+  const [speakIdx,  setSpeakIdx]  = useState(0);
+  const [thinkVisible, setThinkVisible] = useState(false);
   const [speakVisible, setSpeakVisible] = useState(false);
 
-  // Fade in al hablar, fade out al parar
+  // Controlar visibilidad de capas según estado
   useEffect(() => {
-    if (state === 'speaking') {
-      setSpeakVersion(v => v + 1); // nuevo key → video remonta y empieza desde 0
+    if (state === 'thinking') {
+      setSpeakVisible(false);
+      setThinkIdx(0);
+      setThinkVisible(true);
+    } else if (state === 'speaking') {
+      setThinkVisible(false);
+      setSpeakIdx(0);
       setSpeakVisible(true);
     } else {
+      // idle o listening: solo capa base
+      setThinkVisible(false);
       setSpeakVisible(false);
     }
   }, [state]);
 
   const listenSrc = LISTEN_LOOPS[listenIdx % LISTEN_LOOPS.length];
-  // Rotamos entre clips de habla en cada turno para dar variedad
-  const speakSrc  = SPEAK_LOOPS[speakVersion % SPEAK_LOOPS.length];
+  const thinkSrc  = THINK_LOOPS[thinkIdx  % THINK_LOOPS.length];
+  const speakSrc  = SPEAK_LOOPS[speakIdx  % SPEAK_LOOPS.length];
 
   return (
     <div className={`relative overflow-hidden rounded-2xl bg-[#0a0f1a] ${className}`}>
@@ -57,16 +71,33 @@ export function Avatar({ state, className = '' }: AvatarProps) {
         style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
       />
 
-      {/* ── Capa top: speak loop con fade ──────────────────── */}
-      {/* key único por turno garantiza que el video siempre arranca desde el inicio */}
-      {/* loop: el clip se repite mientras Clara siga hablando en un turno largo */}
+      {/* ── Capa media: think loop con fade ────────────────── */}
       <video
-        key={`speak-${speakVersion}`}
+        key={thinkSrc}
+        src={thinkSrc}
+        autoPlay
+        muted
+        playsInline
+        onEnded={() => thinkVisible && setThinkIdx(i => i + 1)}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: thinkVisible ? 1 : 0,
+          transition: 'opacity 0.4s ease',
+        }}
+      />
+
+      {/* ── Capa top: speak loop con fade ──────────────────── */}
+      <video
+        key={speakSrc}
         src={speakSrc}
         autoPlay
         muted
         playsInline
-        loop
+        onEnded={() => speakVisible && setSpeakIdx(i => i + 1)}
         style={{
           position: 'absolute',
           inset: 0,
