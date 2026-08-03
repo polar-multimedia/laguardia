@@ -1,7 +1,6 @@
 /**
  * Widget de evidencia científica.
  * Se muestra cuando Clara cita papers en su respuesta.
- * Cada tarjeta muestra: título, autores, año, snippet y botón para abrir el PDF en la página exacta.
  */
 import { useState } from 'react';
 import { FileText, ChevronDown, ChevronUp, X } from 'lucide-react';
@@ -15,7 +14,7 @@ interface EvidenceWidgetProps {
 
 export function EvidenceWidget({ evidence, onClose }: EvidenceWidgetProps) {
   const [selectedPdf, setSelectedPdf] = useState<EvidenceItem | null>(null);
-  const [expandedIdx, setExpandedIdx] = useState<number | null>(0); // primer paper abierto por defecto
+  const [expandedIdx, setExpandedIdx] = useState<number | null>(0);
 
   if (evidence.length === 0) return null;
 
@@ -29,9 +28,7 @@ export function EvidenceWidget({ evidence, onClose }: EvidenceWidgetProps) {
   }
 
   return (
-    <div
-      className="slide-up flex flex-col gap-2 w-full max-h-[70vh] overflow-y-auto"
-    >
+    <div className="slide-up flex flex-col gap-2 w-full max-h-[70vh] overflow-y-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-1">
         <div className="flex items-center gap-2">
@@ -81,7 +78,6 @@ function PaperCard({ item, isExpanded, onToggle, onOpenPdf }: PaperCardProps) {
         borderColor: isExpanded ? 'rgba(91, 141, 238, 0.35)' : 'rgba(30, 42, 63, 0.8)',
       }}
     >
-      {/* Card header — siempre visible */}
       <button
         onClick={onToggle}
         className="w-full flex items-start justify-between gap-3 px-4 py-3 text-left"
@@ -99,7 +95,6 @@ function PaperCard({ item, isExpanded, onToggle, onOpenPdf }: PaperCardProps) {
         </div>
       </button>
 
-      {/* Expanded: snippet + botón PDF */}
       {isExpanded && (
         <div className="px-4 pb-4 border-t" style={{ borderColor: 'rgba(30, 42, 63, 0.6)' }}>
           {item.snippet && (
@@ -110,30 +105,18 @@ function PaperCard({ item, isExpanded, onToggle, onOpenPdf }: PaperCardProps) {
               "{item.snippet.length > 300 ? item.snippet.slice(0, 300) + '…' : item.snippet}"
             </blockquote>
           )}
-
-          <div className="flex items-center justify-between mt-3">
-            {item.page && (
-              <span className="text-xs text-slate-600">
-                Página {item.page}
-              </span>
-            )}
+          <div className="flex items-center justify-end mt-3">
             <button
               onClick={onOpenPdf}
-              className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{
                 background: 'rgba(91, 141, 238, 0.12)',
                 color: '#5b8dee',
                 border: '1px solid rgba(91, 141, 238, 0.25)',
               }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(91, 141, 238, 0.22)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'rgba(91, 141, 238, 0.12)';
-              }}
             >
               <FileText size={12} />
-              Ver paper{item.page ? ` · p.${item.page}` : ''}
+              Abrir paper{item.page ? ` · p.${item.page}` : ''}
             </button>
           </div>
         </div>

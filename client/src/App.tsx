@@ -1,35 +1,15 @@
 /**
  * Pantalla principal de Clara-Laguardia26.
+ *
+ * Layout de dos columnas:
+ * ┌─────────────────────┬──────────────────────────────┐
+ * │   Avatar + controles│   Panel de evidencia / PDF   │
+ * └─────────────────────┴──────────────────────────────┘
  */
 import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { Avatar } from './components/Avatar';
 import { VoiceButton } from './components/VoiceButton';
 import { EvidenceWidget } from './components/EvidenceWidget';
-
-// Icono micrófono ON
-function MicOnIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-      <line x1="12" y1="19" x2="12" y2="23"/>
-      <line x1="8" y1="23" x2="16" y2="23"/>
-    </svg>
-  );
-}
-
-// Icono micrófono OFF (con línea diagonal)
-function MicOffIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="1" y1="1" x2="23" y2="23"/>
-      <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-      <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
-      <line x1="12" y1="19" x2="12" y2="23"/>
-      <line x1="8" y1="23" x2="16" y2="23"/>
-    </svg>
-  );
-}
 
 export default function App() {
   const {
@@ -37,15 +17,12 @@ export default function App() {
     avatarState,
     evidence,
     transcript,
-    muted,
     connect,
     disconnect,
     clearEvidence,
-    toggleMute,
   } = useRealtimeSession();
 
   const hasEvidence = evidence.length > 0;
-  const isActive = status === 'ready';
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
@@ -56,43 +33,18 @@ export default function App() {
         style={{ borderColor: 'rgba(30,42,63,0.6)', background: 'rgba(8,12,20,0.95)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-            style={{ background: 'linear-gradient(135deg, #5b8dee, #8b5cf6)' }}>
-            CL
-          </div>
           <div>
-            <p className="text-sm font-semibold text-slate-200">Dra. Clara Laguardia</p>
-            <p className="text-xs text-slate-500">Curaduría Científica · Bacmune MV130</p>
+            <p className="text-sm font-semibold text-slate-200">Clara Laguardia</p>
+            <p className="text-xs text-slate-500">Especialista en Inmunología Bacteriana · Bacmune MV130</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {isActive && (
+        <div className="flex items-center gap-2">
+          {status === 'ready' && (
             <div className="flex items-center gap-1.5 text-xs text-emerald-400">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Sesión activa
             </div>
-          )}
-
-          {/* ── Botón MUTE ── visible sólo cuando hay sesión activa */}
-          {isActive && (
-            <button
-              onClick={toggleMute}
-              title={muted ? 'Activar micrófono' : 'Silenciar micrófono'}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
-              style={{
-                background: muted
-                  ? 'rgba(239,68,68,0.15)'
-                  : 'rgba(91,141,238,0.12)',
-                border: muted
-                  ? '1px solid rgba(239,68,68,0.4)'
-                  : '1px solid rgba(91,141,238,0.25)',
-                color: muted ? '#f87171' : '#93c5fd',
-              }}
-            >
-              {muted ? <MicOffIcon /> : <MicOnIcon />}
-              <span>{muted ? 'Silenciado' : 'Micrófono'}</span>
-            </button>
           )}
         </div>
       </header>
@@ -115,23 +67,8 @@ export default function App() {
             <Avatar state={avatarState} className="w-full h-full" />
           </div>
 
-          {/* Indicador de mute sobre el avatar */}
-          {muted && isActive && (
-            <div
-              className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-xl text-sm"
-              style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                color: '#f87171',
-              }}
-            >
-              <MicOffIcon />
-              <span>Micrófono silenciado — Clara no escucha</span>
-            </div>
-          )}
-
           {/* Transcript del usuario */}
-          {transcript && !muted && (
+          {transcript && (
             <div
               className="w-full mt-4 px-4 py-3 rounded-xl text-sm text-slate-300 italic"
               style={{

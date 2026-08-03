@@ -3,8 +3,8 @@
  * La API key NUNCA sale al cliente.
  *
  * Protocolo adicional (mensajes custom hacia el cliente):
- *   { type: 'clara.evidence', evidence: EvidenceItem[] }  — resultados de file_search
- *   { type: 'clara.session_id', sessionId: string }       — ID de sesión para logging
+ *   { type: 'clara.evidence', evidence: EvidenceItem[], formalResponse: string }
+ *   { type: 'clara.session_id', sessionId: string }
  */
 import WebSocket, { WebSocketServer } from 'ws';
 import type { IncomingMessage, Server } from 'http';
@@ -25,8 +25,8 @@ export function attachRealtimeProxy(httpServer: Server): void {
     // Estado por sesión
     let sessionId: string;
     let openaiWs: WebSocket | null = null;
-    let userTranscript = '';
-    let claraResponse = '';
+    let claraAudioTranscript = ''; // acumulado via response.audio_transcript.delta
+    let claraTextOutput = '';      // acumulado via response.text.delta
     let lastEvidence: EvidenceItem[] = [];
     let turnIndex = 0;
 
@@ -49,7 +49,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
     openaiWs.on('open', () => {
       console.log('[Realtime] Conectado a OpenAI Realtime');
 
-      // Configurar sesión con el prompt canónico de Clara
+      // Formato idéntico al commit 7356b87 — NO modificar
       openaiWs!.send(
         JSON.stringify({
           type: 'session.update',
@@ -90,53 +90,59 @@ export function attachRealtimeProxy(httpServer: Server): void {
         return;
       }
 
-      if (event.type === "error") {
-        console.error("[Realtime] Error OpenAI detail:", JSON.stringify(event));
+      if (event.type === 'error') {
+        console.error('[Realtime] Error OpenAI:', JSON.stringify(event));
       }
 
-      // ── Reenviar evento al cliente (pass-through) ──────────────
+      // ── Reenviar al cliente (pass-through) ─────────────────────
       if (clientWs.readyState === WebSocket.OPEN) {
         clientWs.send(raw);
       }
 
-      // ── Interceptar transcripción del usuario ──────────────────
-      if (
-        event.type === 'conversation.item.input_audio_transcription.completed'
-      ) {
-        userTranscript = event.transcript ?? '';
-        console.log('[Realtime] Transcripción:', userTranscript.slice(0, 80));
-
-        // file_search en paralelo — sin bloquear la respuesta de voz
-        searchCorpus(userTranscript)
-          .then((evidence) => {
-            lastEvidence = evidence;
-            if (evidence.length > 0 && clientWs.readyState === WebSocket.OPEN) {
-              safeSend(clientWs, { type: 'clara.evidence', evidence });
-            }
-          })
-          .catch((err) => console.error('[Realtime] searchCorpus error:', err));
+      // ── Capturar transcripción del audio de Clara ──────────────
+      // response.audio_transcript.delta: transcripción del audio generado
+      if (event.type === 'response.audio_transcript.delta') {
+        claraAudioTranscript += event.delta ?? '';
       }
 
-      // ── Capturar respuesta de texto de Clara ───────────────────
+      // ── Capturar texto directo si la API lo envía ──────────────
       if (event.type === 'response.text.delta') {
-        claraResponse += event.delta ?? '';
+        claraTextOutput += event.delta ?? '';
       }
 
-      // ── Fin de turno: logging ──────────────────────────────────
+      // ── Fin de turno: buscar papers en el corpus ───────────────
       if (event.type === 'response.done') {
-        if (userTranscript) {
+        // Usar transcripción de audio (siempre disponible) o texto directo
+        const queryText = claraAudioTranscript || claraTextOutput;
+        const savedAudio = claraAudioTranscript;
+        const savedText = claraTextOutput;
+        claraAudioTranscript = '';
+        claraTextOutput = '';
+
+        if (queryText.trim().length > 20) {
+          searchCorpus(queryText)
+            .then(({ evidence, formalResponse }) => {
+              lastEvidence = evidence;
+              if ((evidence.length > 0 || formalResponse) && clientWs.readyState === WebSocket.OPEN) {
+                safeSend(clientWs, {
+                  type: 'clara.evidence',
+                  evidence,
+                  formalResponse,
+                });
+              }
+            })
+            .catch((err) => console.error('[Realtime] searchCorpus error:', err));
+
           logConversationTurn({
             sessionId,
-            userTranscript,
-            claraResponse,
+            userTranscript: '',
+            claraResponse: savedAudio || savedText,
             citedPapers: lastEvidence,
             turnIndex,
           }).catch(console.error);
           turnIndex++;
         }
-        // Reset para el siguiente turno
-        userTranscript = '';
-        claraResponse = '';
+
         lastEvidence = [];
       }
     });
