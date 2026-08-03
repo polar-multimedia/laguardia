@@ -15,8 +15,8 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    const { evidence, formalResponse } = await searchCorpus(query);
-    res.json({ evidence, formalResponse });
+    const evidence = await searchCorpus(query);
+    res.json({ evidence });
   } catch (err) {
     console.error('[search] Error:', err);
     res.status(500).json({ error: 'Error al buscar en el corpus.' });

@@ -1,3 +1,5 @@
+/** Tipos compartidos cliente-servidor */
+
 export interface EvidenceItem {
   file_id: string;
   title: string;
@@ -6,5 +8,4 @@ export interface EvidenceItem {
   filename: string;
   snippet: string;
   page: number | null;
-  citationNumber: number;
 }
