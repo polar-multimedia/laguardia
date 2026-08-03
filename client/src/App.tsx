@@ -6,7 +6,6 @@ import { Avatar } from './components/Avatar';
 import { VoiceButton } from './components/VoiceButton';
 import { EvidenceWidget } from './components/EvidenceWidget';
 
-// Icono micrófono ON
 function MicOnIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,7 +17,6 @@ function MicOnIcon() {
   );
 }
 
-// Icono micrófono OFF (con línea diagonal)
 function MicOffIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -36,6 +34,7 @@ export default function App() {
     status,
     avatarState,
     evidence,
+    formalResponse,
     transcript,
     muted,
     connect,
@@ -44,7 +43,7 @@ export default function App() {
     toggleMute,
   } = useRealtimeSession();
 
-  const hasEvidence = evidence.length > 0;
+  const hasEvidence = evidence.length > 0 || (formalResponse && formalResponse.trim().length > 0);
   const isActive = status === 'ready';
 
   return (
@@ -56,8 +55,10 @@ export default function App() {
         style={{ borderColor: 'rgba(30,42,63,0.6)', background: 'rgba(8,12,20,0.95)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-            style={{ background: 'linear-gradient(135deg, #5b8dee, #8b5cf6)' }}>
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+            style={{ background: 'linear-gradient(135deg, #5b8dee, #8b5cf6)' }}
+          >
             CL
           </div>
           <div>
@@ -73,20 +74,14 @@ export default function App() {
               Sesión activa
             </div>
           )}
-
-          {/* ── Botón MUTE ── visible sólo cuando hay sesión activa */}
           {isActive && (
             <button
               onClick={toggleMute}
               title={muted ? 'Activar micrófono' : 'Silenciar micrófono'}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200"
               style={{
-                background: muted
-                  ? 'rgba(239,68,68,0.15)'
-                  : 'rgba(91,141,238,0.12)',
-                border: muted
-                  ? '1px solid rgba(239,68,68,0.4)'
-                  : '1px solid rgba(91,141,238,0.25)',
+                background: muted ? 'rgba(239,68,68,0.15)' : 'rgba(91,141,238,0.12)',
+                border: muted ? '1px solid rgba(239,68,68,0.4)' : '1px solid rgba(91,141,238,0.25)',
                 color: muted ? '#f87171' : '#93c5fd',
               }}
             >
@@ -100,22 +95,26 @@ export default function App() {
       {/* ── Main content ─────────────────────────────────────────── */}
       <main className="flex-1 flex overflow-hidden">
 
-        {/* Columna izquierda: Avatar */}
+        {/* Columna izquierda: Avatar + controles */}
         <div
           className="flex flex-col items-center justify-between p-6 flex-shrink-0"
-          style={{ width: hasEvidence ? '420px' : '100%', maxWidth: hasEvidence ? '420px' : '520px', margin: '0 auto' }}
+          style={{
+            width: hasEvidence ? '380px' : '100%',
+            maxWidth: hasEvidence ? '380px' : '520px',
+            margin: '0 auto',
+          }}
         >
           {/* Avatar */}
           <div
             className={`w-full rounded-2xl overflow-hidden transition-all duration-300 ${
               avatarState !== 'idle' ? 'avatar-ring-active' : 'avatar-ring'
             }`}
-            style={{ aspectRatio: '3/4', maxHeight: '520px' }}
+            style={{ aspectRatio: '3/4', maxHeight: '480px' }}
           >
             <Avatar state={avatarState} className="w-full h-full" />
           </div>
 
-          {/* Indicador de mute sobre el avatar */}
+          {/* Indicador mute */}
           {muted && isActive && (
             <div
               className="w-full mt-3 flex items-center justify-center gap-2 py-2 rounded-xl text-sm"
@@ -126,11 +125,11 @@ export default function App() {
               }}
             >
               <MicOffIcon />
-              <span>Micrófono silenciado — Clara no escucha</span>
+              <span>Clara no escucha — micrófono silenciado</span>
             </div>
           )}
 
-          {/* Transcript del usuario */}
+          {/* Transcript */}
           {transcript && !muted && (
             <div
               className="w-full mt-4 px-4 py-3 rounded-xl text-sm text-slate-300 italic"
@@ -143,13 +142,9 @@ export default function App() {
             </div>
           )}
 
-          {/* Botón de voz */}
+          {/* VoiceButton */}
           <div className="mt-6">
-            <VoiceButton
-              status={status}
-              onConnect={connect}
-              onDisconnect={disconnect}
-            />
+            <VoiceButton status={status} onConnect={connect} onDisconnect={disconnect} />
           </div>
 
           {status === 'disconnected' && (
@@ -160,7 +155,7 @@ export default function App() {
           )}
         </div>
 
-        {/* Columna derecha: Evidence panel */}
+        {/* Panel derecho: Respuesta formal + evidencia */}
         {hasEvidence && (
           <div
             className="flex-1 border-l overflow-hidden flex flex-col"
@@ -169,12 +164,12 @@ export default function App() {
             <div className="flex-1 overflow-y-auto p-5">
               <EvidenceWidget
                 evidence={evidence}
+                formalResponse={formalResponse}
                 onClose={clearEvidence}
               />
             </div>
           </div>
         )}
-
       </main>
     </div>
   );
