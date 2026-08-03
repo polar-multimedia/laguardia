@@ -1,0 +1,162 @@
+[
+  {
+    "file_id": "",
+    "title": "Bacterial Mucosal Immunotherapy",
+    "authors": "Nieto et al.",
+    "year": 2021,
+    "filename": "1-Nieto2021. Bacterial Mucosal Immunotherapy.PDF",
+    "topics": ["MV130", "inmunidad mucosal", "infecciones recurrentes", "revisión clínica"]
+  },
+  {
+    "file_id": "",
+    "title": "Trained Immunity Induction by the Inactivated Mucosal Vaccine MV130",
+    "authors": "Brandi et al.",
+    "year": 2022,
+    "filename": "2- Brandi 2022 Trained immunity induction by the inactivated mucosal.pdf",
+    "topics": ["inmunidad entrenada", "MV130", "mecanismo de acción", "monocitos"]
+  },
+  {
+    "file_id": "",
+    "title": "Vacunas Antiinfecciosas de Mucosas en la Profilaxis de Infecciones",
+    "authors": "Sánchez Ramón et al.",
+    "year": 2020,
+    "filename": "3. Sanchez Ramon 2020 Vacunas antiinfecciosas de mucosas en la profilaxios de infecciones.pdf",
+    "topics": ["vacunas mucosales", "profilaxis", "infecciones recurrentes", "español"]
+  },
+  {
+    "file_id": "",
+    "title": "Mucosal Bacterial Immunotherapy with MV130",
+    "authors": "García-González et al.",
+    "year": 2019,
+    "filename": "4. Garc.Gonz.2019.Mucosal bacterial inmunotherapy with MV130.PDF",
+    "topics": ["MV130", "inmunoterapia mucosal bacteriana", "eficacia clínica"]
+  },
+  {
+    "file_id": "",
+    "title": "Human Dendritic Cells Activated with MV130 Induce Trained Immunity",
+    "authors": "Cirauqui et al.",
+    "year": 2018,
+    "filename": "5. Cirauqui 2018 Human dendritic cells activated with MV130 induce.pdf",
+    "topics": ["células dendríticas", "inmunidad entrenada", "MV130", "mecanismo inmune"]
+  },
+  {
+    "file_id": "",
+    "title": "Sublingual Therapeutic Immunization with a Polyvalent Bacterial Preparation",
+    "authors": "Alecsandru et al.",
+    "year": 2011,
+    "filename": "6. Alecandru 2011 Sublingual therapeutic immunization with.pdf",
+    "topics": ["inmunización sublingual", "preparación polibacteriana", "eficacia"]
+  },
+  {
+    "file_id": "",
+    "title": "MV130 Protects Against SARS-CoV-2 Infection and Improves COVID-19 Outcomes",
+    "authors": "del Fresno C. et al.",
+    "year": 2021,
+    "filename": "7. del Fresno C 2021 The Bacterial Mucosal Immunotherapy MV130 Protects Against SARS-CoV-2 Infection and Improves.pdf",
+    "topics": ["SARS-CoV-2", "COVID-19", "MV130", "protección viral", "inmunidad innata"]
+  },
+  {
+    "file_id": "",
+    "title": "Recent Progress in Mucosal Vaccine Development",
+    "authors": "Lycke et al.",
+    "year": 2012,
+    "filename": "8. Lycke 2012 Recent progress in mucosal vaccine.pdf",
+    "topics": ["vacunas mucosales", "desarrollo", "revisión", "sistemas de entrega"]
+  },
+  {
+    "file_id": "",
+    "title": "Sublingual Vaccination and Delivery Systems",
+    "authors": "París et al.",
+    "year": 2021,
+    "filename": "9. Paris 2021 Sublingual vaccination and delivery systems.pdf",
+    "topics": ["vacunación sublingual", "sistemas de entrega", "mucosa oral"]
+  },
+  {
+    "file_id": "",
+    "title": "La Memoria del Sistema Inmune Innato: Mecanismos y Estrategias Terapéuticas",
+    "authors": "Angulo Villavicencio et al.",
+    "year": 2020,
+    "filename": "10. Angulo Villavicencio 2020 La memoria del sistema inmune innato mecanismos y estrategias terapeuticas.pdf",
+    "topics": ["memoria inmune innata", "mecanismos", "estrategias terapéuticas", "español"]
+  },
+  {
+    "file_id": "",
+    "title": "Sublingual Bacterial Vaccination Reduces Recurrent Infections in Adults",
+    "authors": "Sánchez Ramón et al.",
+    "year": 2021,
+    "filename": "11. Sanchez Ramon 2021. Sublingual Bacterial Vaccination Reduces Recurrent Infections.PDF",
+    "topics": ["vacunación sublingual", "infecciones recurrentes", "adultos", "eficacia clínica"]
+  },
+  {
+    "file_id": "",
+    "title": "Long Term Benefit of Perlingual Polybacterial Vaccination in Chronic Rhinosinusitis",
+    "authors": "Pérez-Sancristobal et al.",
+    "year": 2023,
+    "filename": "12 Pérez_Sancristobal 2023 Long Term Benefit of Perlingual Poluybacterial.pdf",
+    "topics": ["rinosinusitis crónica", "beneficio a largo plazo", "vacuna polibacteriana", "perlingual"]
+  },
+  {
+    "file_id": "",
+    "title": "Bacterial Vaccines Adjuvants Prevent Wheezing Episodes in Children",
+    "authors": "Nieto Antonio et al.",
+    "year": 2022,
+    "filename": "13. Nieto Antonio 2022  A Do Bacterial vaccines adyuvants prevent wheezing episodes in children.pdf",
+    "topics": ["sibilancias", "pediatría", "vacunas bacterianas", "adyuvantes", "episodios recurrentes"]
+  },
+  {
+    "file_id": "",
+    "title": "Trained Immunity-Based Vaccines as a Prophylactic Strategy",
+    "authors": "Guevara Hoyer et al.",
+    "year": 2020,
+    "filename": "14. Guevara Hoyer 2020. Trained Immunity Based Vaccines as a Prophylactic Strategy.PDF",
+    "topics": ["vacunas basadas en inmunidad entrenada", "profilaxis", "estrategia terapéutica"]
+  },
+  {
+    "file_id": "",
+    "title": "Combining Different Bacteria in Vaccine Formulations",
+    "authors": "Bodas Pinedo et al.",
+    "year": 2023,
+    "filename": "15. Bodas Pinedo 2023. Combining different bacteria in vaccine formulations.PDF",
+    "topics": ["formulaciones polibacterianas", "combinación bacterias", "vacunas"]
+  },
+  {
+    "file_id": "",
+    "title": "Mucosal Bacterial Immunotherapy Attenuates the Development of Allergic Airway Inflammation",
+    "authors": "Jiménez et al.",
+    "year": 2024,
+    "filename": "16. Jimenez 2024. Mucosal Bacterial Immunotherapy Attenuates the Development.pdf",
+    "topics": ["inflamación alérgica", "vías respiratorias", "MV130", "inmunoterapia mucosal", "atenuación"]
+  },
+  {
+    "file_id": "",
+    "title": "EPOC y Vacunación Mucosal Bacteriana",
+    "authors": "Conejero, Maestu et al.",
+    "year": 2021,
+    "filename": "17. 2021 Conejero, Maestu. EPOC.pdf",
+    "topics": ["EPOC", "enfermedad pulmonar obstructiva crónica", "vacunación mucosal"]
+  },
+  {
+    "file_id": "",
+    "title": "Trained Immunity-Based Vaccine in B Cell Deficiency Patients",
+    "authors": "Ochoa Grullón et al.",
+    "year": 2021,
+    "filename": "18. Ochoa Grullon. 2021. Trained Inmunity Based Vaccine in B Cell.PDF",
+    "topics": ["inmunodeficiencia B", "inmunidad entrenada", "pacientes inmunodeficientes", "MV130"]
+  },
+  {
+    "file_id": "",
+    "title": "MV130 in the Prevention of Recurrent Respiratory Tract Infections",
+    "authors": "Montalbán Hernández et al.",
+    "year": 2024,
+    "filename": "19. Montalban Hernandez 2024. MV130 in the Prevention of Recurrent Respiratory.pdf",
+    "topics": ["prevención", "infecciones respiratorias recurrentes", "MV130", "estudio clínico"]
+  },
+  {
+    "file_id": "",
+    "title": "Resumen Bibliográfico Bacmune — Índice de Evidencia Científica",
+    "authors": "Laboratorios Cascan / Inmunotek",
+    "year": 2024,
+    "filename": "Resumen Bibliografico.Bacmune.pdf",
+    "topics": ["índice maestro", "bibliografía completa", "MV130", "Bacmune", "resumen ejecutivo"]
+  }
+]

@@ -14,7 +14,8 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REGISTRY_PATH = path.join(__dirname, '../../../corpus-registry.json');
+// __dirname en Railway = /app/dist/routes  →  ../../ sube a /app/corpus-registry.json
+const REGISTRY_PATH = path.join(__dirname, '../../corpus-registry.json');
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });

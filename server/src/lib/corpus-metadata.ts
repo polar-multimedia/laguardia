@@ -16,7 +16,8 @@ export interface CorpusEntry {
 }
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const REGISTRY_PATH = path.join(__dirname, '../../../corpus-registry.json');
+// __dirname en Railway = /app/dist/lib  →  ../../ sube a /app/corpus-registry.json
+const REGISTRY_PATH = path.join(__dirname, '../../corpus-registry.json');
 
 let _cache: CorpusEntry[] | null = null;
 
