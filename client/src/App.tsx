@@ -1,10 +1,12 @@
 /**
  * Pantalla principal de Clara-Laguardia26.
  *
- * Layout de dos columnas:
- * ┌─────────────────────┬──────────────────────────────┐
- * │   Avatar + controles│   Panel de evidencia / PDF   │
- * └─────────────────────┴──────────────────────────────┘
+ * Layout vertical:
+ * ┌─────────────────────────────────────┐
+ * │   Avatar + controles (centrado)     │
+ * ├─────────────────────────────────────┤
+ * │   Evidencia científica (scroll)     │
+ * └─────────────────────────────────────┘
  */
 import { useRealtimeSession } from './hooks/useRealtimeSession';
 import { Avatar } from './components/Avatar';
@@ -54,19 +56,19 @@ export default function App() {
       </header>
 
       {/* ── Main content ─────────────────────────────────────────── */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Columna izquierda: Avatar */}
+        {/* Sección avatar — altura fija, centrada */}
         <div
-          className="flex flex-col items-center justify-between p-6 flex-shrink-0"
-          style={{ width: hasEvidence ? '420px' : '100%', maxWidth: hasEvidence ? '420px' : '520px', margin: '0 auto' }}
+          className="flex flex-col items-center px-6 pt-6 pb-4 flex-shrink-0"
+          style={{ maxWidth: '480px', width: '100%', margin: '0 auto' }}
         >
           {/* Avatar */}
           <div
             className={`w-full rounded-2xl overflow-hidden transition-all duration-300 ${
               avatarState !== 'idle' ? 'avatar-ring-active' : 'avatar-ring'
             }`}
-            style={{ aspectRatio: '3/4', maxHeight: '520px' }}
+            style={{ aspectRatio: '3/4', maxHeight: '440px' }}
           >
             <Avatar state={avatarState} className="w-full h-full" />
           </div>
@@ -74,7 +76,7 @@ export default function App() {
           {/* Transcript del usuario */}
           {transcript && (
             <div
-              className="w-full mt-4 px-4 py-3 rounded-xl text-sm text-slate-300 italic"
+              className="w-full mt-3 px-4 py-2.5 rounded-xl text-sm text-slate-300 italic"
               style={{
                 background: 'rgba(91,141,238,0.06)',
                 border: '1px solid rgba(91,141,238,0.15)',
@@ -85,7 +87,7 @@ export default function App() {
           )}
 
           {/* Botón de voz */}
-          <div className="mt-6">
+          <div className="mt-4">
             <VoiceButton
               status={status}
               onConnect={connect}
@@ -94,20 +96,26 @@ export default function App() {
           </div>
 
           {status === 'disconnected' && (
-            <p className="mt-4 text-xs text-center text-slate-600 max-w-xs">
+            <p className="mt-3 text-xs text-center text-slate-600 max-w-xs">
               Haz clic para iniciar la sesión de voz. Clara responderá basándose
               exclusivamente en los 20 estudios clínicos aprobados de Bacmune/MV130.
             </p>
           )}
         </div>
 
-        {/* Columna derecha: Evidence panel */}
+        {/* ── Panel de evidencia científica — debajo del avatar ── */}
         {hasEvidence && (
           <div
-            className="flex-1 border-l overflow-hidden flex flex-col"
-            style={{ borderColor: 'rgba(30,42,63,0.6)' }}
+            className="flex-1 overflow-y-auto border-t"
+            style={{
+              borderColor: 'rgba(30,42,63,0.6)',
+              background: 'rgba(8,12,20,0.6)',
+            }}
           >
-            <div className="flex-1 overflow-y-auto p-5">
+            <div
+              className="mx-auto px-6 py-5"
+              style={{ maxWidth: '760px' }}
+            >
               <EvidenceWidget
                 evidence={evidence}
                 onClose={clearEvidence}

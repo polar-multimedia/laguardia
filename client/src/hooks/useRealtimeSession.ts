@@ -155,10 +155,16 @@ export function useRealtimeSession(): UseRealtimeSession {
         break;
 
       // Clara terminó de responder
-      case 'response.done':
-        // Pequeño delay para que el audio termine de reproducirse
-        setTimeout(() => setAvatarState('idle'), 500);
+      case 'response.done': {
+        // Esperar a que todo el audio en cola termine de reproducirse antes de volver a idle
+        const ctx = audioCtxRef.current;
+        const remaining = ctx
+          ? Math.max(0, nextPlayTimeRef.current - ctx.currentTime)
+          : 0;
+        const delay = Math.round(remaining * 1000) + 300; // +300 ms de margen
+        setTimeout(() => setAvatarState('idle'), delay);
         break;
+      }
 
       case 'session.created':
         setStatus('ready');
@@ -211,7 +217,6 @@ export function useRealtimeSession(): UseRealtimeSession {
       }
       try {
         const event = JSON.parse(msg.data);
-        console.log('[DEBUG] Event:', event.type);
         handleEvent(event);
       } catch {
         // ignore parse errors
