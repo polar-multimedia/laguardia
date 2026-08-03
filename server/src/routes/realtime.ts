@@ -112,38 +112,48 @@ export function attachRealtimeProxy(httpServer: Server): void {
 
       // ── Fin de turno: buscar papers en el corpus ───────────────
       if (event.type === 'response.done') {
-        // Usar transcripción de audio (siempre disponible) o texto directo
-        const queryText = claraAudioTranscript || claraTextOutput;
-        const savedAudio = claraAudioTranscript;
-        const savedText = claraTextOutput;
+        // Fuente primaria: transcript incluido en el evento response.done
+        // event.response.output[*].content[*].transcript (siempre presente con audio)
+        let donTranscript = '';
+        try {
+          const outputs: any[] = event.response?.output ?? [];
+          for (const out of outputs) {
+            for (const part of out.content ?? []) {
+              if (part.transcript) donTranscript += part.transcript;
+            }
+          }
+        } catch { /* ignorar */ }
+
+        // Fallback: acumulados por delta si el campo no vino en response.done
+        const queryText = donTranscript || claraAudioTranscript || claraTextOutput;
+        const savedResponse = queryText;
         claraAudioTranscript = '';
         claraTextOutput = '';
+
+        console.log('[Realtime] response.done transcript length:', queryText.length, '| preview:', queryText.slice(0, 80));
 
         if (queryText.trim().length > 20) {
           searchCorpus(queryText)
             .then(({ evidence, formalResponse }) => {
               lastEvidence = evidence;
-              if ((evidence.length > 0 || formalResponse) && clientWs.readyState === WebSocket.OPEN) {
-                safeSend(clientWs, {
-                  type: 'clara.evidence',
-                  evidence,
-                  formalResponse,
-                });
-              }
+              console.log('[Realtime] searchCorpus found', evidence.length, 'papers');
+              safeSend(clientWs, {
+                type: 'clara.evidence',
+                evidence,
+                formalResponse,
+              });
+              // Log DESPUÉS de resolver el Promise para tener los papers correctos
+              logConversationTurn({
+                sessionId,
+                userTranscript: '',
+                claraResponse: savedResponse,
+                citedPapers: evidence,
+                turnIndex,
+              }).catch(console.error);
+              turnIndex++;
             })
             .catch((err) => console.error('[Realtime] searchCorpus error:', err));
-
-          logConversationTurn({
-            sessionId,
-            userTranscript: '',
-            claraResponse: savedAudio || savedText,
-            citedPapers: lastEvidence,
-            turnIndex,
-          }).catch(console.error);
-          turnIndex++;
         }
-
-        lastEvidence = [];
       }
     });
 
