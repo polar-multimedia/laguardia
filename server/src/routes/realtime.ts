@@ -77,7 +77,11 @@ export function attachRealtimeProxy(httpServer: Server): void {
       );
     });
 
-    openaiWs.on('message', async (data: WebSocket.Data) => {
+    openaiWs.on('message', async (data: WebSocket.Data, isBinary: boolean) => {
+      if (isBinary) {
+        ws.send(data, { binary: true });
+        return;
+      }
       const raw = data.toString();
       let event: Record<string, any>;
       try {

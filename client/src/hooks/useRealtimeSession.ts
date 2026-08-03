@@ -172,6 +172,7 @@ export function useRealtimeSession(): UseRealtimeSession {
     setStatus('connecting');
 
     const ws = new WebSocket(WS_URL);
+    ws.binaryType = 'arraybuffer';
     wsRef.current = ws;
 
     ws.onopen = async () => {
@@ -185,6 +186,24 @@ export function useRealtimeSession(): UseRealtimeSession {
     };
 
     ws.onmessage = (msg) => {
+      if (msg.data instanceof ArrayBuffer) {
+        const int16 = new Int16Array(msg.data);
+        const float32 = new Float32Array(int16.length);
+        for (let i = 0; i < int16.length; i++) float32[i] = int16[i] / 32768;
+        const ctx = audioCtxRef.current;
+        if (ctx) {
+          const buffer = ctx.createBuffer(1, float32.length, SAMPLE_RATE);
+          buffer.copyToChannel(float32, 0);
+          const source = ctx.createBufferSource();
+          source.buffer = buffer;
+          source.connect(ctx.destination);
+          const when = Math.max(ctx.currentTime, nextPlayTimeRef.current);
+          source.start(when);
+          nextPlayTimeRef.current = when + buffer.duration;
+          setAvatarState('speaking');
+        }
+        return;
+      }
       try {
         const event = JSON.parse(msg.data);
         console.log('[DEBUG] Event:', event.type);
