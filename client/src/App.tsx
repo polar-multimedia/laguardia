@@ -62,8 +62,8 @@ export default function App() {
             CL
           </div>
           <div>
-            <p className="text-sm font-semibold text-slate-200">Dra. Clara Laguardia</p>
-            <p className="text-xs text-slate-500">Curaduría Científica · Bacmune MV130</p>
+            <p className="text-sm font-semibold text-slate-200">Clara Laguardia</p>
+            <p className="text-xs text-slate-500">Especialista en Inmunología Bacteriana · Bacmune MV130</p>
           </div>
         </div>
 
