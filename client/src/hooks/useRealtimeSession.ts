@@ -75,7 +75,7 @@ export function useRealtimeSession(): UseRealtimeSession {
 
   // ── Microphone capture ─────────────────────────────────────
   async function startMic(ws: WebSocket) {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     streamRef.current = stream;
 
     const ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
@@ -103,7 +103,11 @@ export function useRealtimeSession(): UseRealtimeSession {
     };
 
     source.connect(processor);
-    processor.connect(ctx.destination);
+    // Conectar via gain silencioso para mantener el grafo activo sin loopback
+    const silentGain = ctx.createGain();
+    silentGain.gain.value = 0;
+    processor.connect(silentGain);
+    silentGain.connect(ctx.destination);
   }
 
   function stopMic() {
