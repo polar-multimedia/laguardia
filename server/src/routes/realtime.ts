@@ -51,18 +51,26 @@ export function attachRealtimeProxy(httpServer: Server): void {
         JSON.stringify({
           type: 'session.update',
           session: {
+            type: 'realtime',
             instructions: CLARA_SYSTEM_PROMPT,
-            voice: 'shimmer',
-            input_audio_format: 'pcm16',
-            output_audio_format: 'pcm16',
+            output_modalities: ['audio'],
             input_audio_transcription: {
               model: 'whisper-1',
             },
-            turn_detection: {
-              type: 'server_vad',
-              threshold: 0.5,
-              prefix_padding_ms: 300,
-              silence_duration_ms: 600,
+            audio: {
+              input: {
+                format: { type: 'audio/pcm', rate: 24000 },
+                turn_detection: {
+                  type: 'server_vad',
+                  threshold: 0.5,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: 600,
+                },
+              },
+              output: {
+                format: { type: 'audio/pcm', rate: 24000 },
+                voice: 'shimmer',
+              },
             },
           },
         }),
