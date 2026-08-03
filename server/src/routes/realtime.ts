@@ -69,7 +69,7 @@ export function attachRealtimeProxy(httpServer: Server): void {
                 },
               },
               output: {
-                format: { type: 'audio/pcm' },
+                format: { type: 'audio/pcm', rate: 24000 },
                 voice: 'shimmer',
               },
             },
