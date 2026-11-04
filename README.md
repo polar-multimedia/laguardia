@@ -4,7 +4,7 @@
 > https://polar-multimedia.github.io/laguardia/ (GitHub Pages → rama `main`, carpeta `/docs`).
 > Voz en tiempo real con gpt-realtime + búsqueda en el vector store de Bacmune a través del
 > puente de Cloudflare (`dr-g.carpinteyro.workers.dev`). El código del puente está en
-> `puente-cloudflare.js`. Para probar otra voz: `?voz=coral` (marin, coral, shimmer, sage, ballad, alloy).
+> `puente-cloudflare.js`. Voz por defecto: coral. Para probar otra: `?voz=marin` (marin, coral, shimmer, sage, ballad, alloy).
 > La app React/Railway de abajo (agosto 2026) queda como referencia.
 
 
