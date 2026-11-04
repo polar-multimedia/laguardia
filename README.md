@@ -1,5 +1,13 @@
 # Clara-Laguardia26
 
+> **Versión en línea (nov 2026):** `docs/` es la página estática que se publica en
+> https://polar-multimedia.github.io/laguardia/ (GitHub Pages → rama `main`, carpeta `/docs`).
+> Voz en tiempo real con gpt-realtime + búsqueda en el vector store de Bacmune a través del
+> puente de Cloudflare (`dr-g.carpinteyro.workers.dev`). El código del puente está en
+> `puente-cloudflare.js`. Para probar otra voz: `?voz=coral` (marin, coral, shimmer, sage, ballad, alloy).
+> La app React/Railway de abajo (agosto 2026) queda como referencia.
+
+
 Agente conversacional de voz con evidencia científica anclada a corpus controlado.
 **Dra. Clara Laguardia** — Bacmune/MV130 · Polar Multimedia · 2026
 

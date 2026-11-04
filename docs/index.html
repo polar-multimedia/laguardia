@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dra. Clara Laguardia · Asesora científica</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#071722;--card:#0e2331;--line:rgba(255,255,255,.1);--c:#51c4ca;--m:#ff5db5;--y:#e8e038;--g:#3ddc84;--s:#c9dce3;--d:rgba(201,220,227,.65)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:#fff;font-family:Manrope,system-ui,sans-serif}
+body{background:radial-gradient(1000px 600px at 80% 0%,rgba(81,196,202,.12),transparent 60%),var(--bg)}
+header{display:flex;align-items:center;gap:18px;padding:16px 28px;border-bottom:1px solid var(--line)}
+header img{height:64px}header .t{font-weight:800;font-size:17px}header .t small{display:block;font-weight:600;font-size:13px;color:var(--d)}
+header .sp{flex:1}
+main{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:28px;padding:24px 28px;max-width:1440px;margin:0 auto}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+@media(max-width:560px){header img{height:44px}header{padding:14px 16px}}
+.stage{position:relative;border-radius:24px;overflow:hidden;aspect-ratio:576/1008;background:#0b1a24;border:2px solid var(--line);transition:border-color .3s,box-shadow .3s;max-height:calc(100vh - 120px);margin:0 auto}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .35s}
+.stage #vS{opacity:0}.stage.speaking #vS{opacity:1}
+.stage.live{border-color:rgba(81,196,202,.6)}.stage.speaking{border-color:var(--c);box-shadow:0 0 40px rgba(81,196,202,.3)}.stage.thinking{border-color:var(--y)}
+.badge{position:absolute;left:14px;top:14px;background:rgba(7,23,34,.75);backdrop-filter:blur(8px);border-radius:999px;padding:8px 14px;font-weight:800;font-size:13px;display:flex;gap:8px;align-items:center}
+.badge i{width:9px;height:9px;border-radius:50%;background:#667}.live .badge i{background:var(--g)}.speaking .badge i{background:var(--c)}.thinking .badge i{background:var(--y)}
+.name{pointer-events:none;position:absolute;left:0;right:0;bottom:0;padding:70px 20px 20px;background:linear-gradient(transparent,rgba(7,23,34,.94));font-weight:800;font-size:22px}
+.name small{display:block;font-size:14px;color:var(--s);font-weight:600}
+.ctl{position:absolute;left:20px;right:20px;bottom:86px;display:flex;justify-content:center;z-index:3}
+.btn{border:0;border-radius:999px;padding:16px 28px;font:800 17px Manrope;cursor:pointer}
+.btn.p{background:var(--c);color:#071722}.btn.e{background:rgba(7,23,34,.85);color:#fff;border:1.5px solid rgba(255,255,255,.35)}
+.btn:disabled{opacity:.5}
+.btn.muted{background:#ff5d6c;color:#fff;border-color:#ff5d6c}
+.stage.muted .badge i{background:#ff5d6c}
+.panel{display:flex;flex-direction:column;gap:16px;min-width:0}
+.intro{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}
+.intro h2{margin:0 0 8px;font-size:22px}.intro p{margin:0;color:var(--s);line-height:1.55;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.chips span:hover{border-color:var(--c);color:#fff}.chips span{cursor:pointer;font-size:13px;font-weight:700;color:var(--s);border:1px solid var(--line);border-radius:999px;padding:7px 12px}
+.msg{font-size:14px;color:var(--y);font-weight:600;min-height:18px}
+.ev{background:var(--card);border:1px solid rgba(81,196,202,.35);border-radius:20px;padding:20px 22px;animation:in .5s ease}
+@keyframes in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.ev .k{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+.ev .q{font-size:15px;color:var(--d);font-weight:600;margin:6px 0 10px}
+.ev .a{font-size:17px;line-height:1.55;color:#fff}
+.ev.none{border-color:rgba(232,224,56,.4)}.ev.none .k{color:var(--y)}
+.src{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.src a{display:block;text-decoration:none;color:inherit;background:#081a26;border:1px solid var(--line);border-radius:14px;padding:12px 14px;transition:border-color .2s}
+.src a:hover{border-color:var(--c)}
+.src b{display:block;font-size:14px;color:#fff}.src em{font-style:normal;display:block;font-size:13px;color:var(--d);margin-top:4px;line-height:1.45}
+.src .open{font-size:12px;font-weight:800;color:var(--c);margin-top:6px;display:block}
+.tx{font-size:14px;color:var(--d);line-height:1.5;max-height:120px;overflow:auto}
+.tx b{color:var(--s)}
+#feed{display:flex;flex-direction:column-reverse;gap:16px}
+.foot{color:var(--d);font-size:12px;text-align:center;padding:4px 0 22px}
+</style></head><body>
+<header><img src="bacmune.png" alt="Bacmune"><div class="t">Dra. Clara Laguardia<small>Asesora científica · responde solo con los estudios aprobados</small></div><div class="sp"></div></header>
+<main>
+  <div><div class="stage" id="stage"><video id="vL" poster="poster.jpg" autoplay loop muted playsinline><source src="listens.webm" type="video/webm"><source src="listens.mp4" type="video/mp4"></video><video id="vS" autoplay loop muted playsinline><source src="speaks.webm" type="video/webm"><source src="speaks.mp4" type="video/mp4"></video>
+    <div class="badge"><i></i><span id="st">Lista</span></div>
+    <div class="ctl"><button class="btn p" id="start">Hablar con Clara</button><button class="btn e" id="mute" style="display:none;margin-right:10px">🎙 Silenciar</button><button class="btn e" id="stop" style="display:none">Terminar</button></div>
+    <div class="name">Dra. Clara Laguardia<small>Inmunología bacteriana e infecciones respiratorias</small></div></div></div>
+  <div class="panel">
+    <div class="intro" id="intro"><h2>Pregúntele como a una colega.</h2><p>Clara conversa en voz y, cuando la pregunta es científica, busca en los estudios aprobados de Bacmune (MV130) y muestra aquí la evidencia con su fuente. Si un dato no está en los estudios, lo dice.</p>
+      <div class="chips"><span>¿Cómo actúa MV130?</span><span>¿Qué evidencia hay en pediatría?</span><span>¿Y en EPOC?</span><span>¿Es seguro en inmunodeprimidos?</span></div></div>
+    <div class="msg" id="msg"></div>
+    <div class="intro" id="txBox" style="display:none;padding:14px 18px"><div class="tx" id="tx"></div></div>
+    <div id="feed"></div>
+  </div>
+</main>
+<div class="foot">20 estudios aprobados de Bacmune (MV130)</div>
+<script src="config.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+var API=(window.CLARA_API||'').replace(/\/$/,'');
+var LINKS={"1":"1YSOJ97nAvCyJQ3LP80xASSfxwsS9Gc68","2":"1IhGqQmmt1kkRi9Tx1stCrlD3kOJRKWmI","3":"1b4yMiFlqNZQR--_1JTA-EM16vZO2A5LP","4":"1cEIO8lxE6yPMOID-6ZSa71HhbgGRUi-8","5":"1MoES-nleaDLytL_Scd4XWr_nw6DkzdBV","6":"1StjeOWHH22jjWaUaHx5xRT2IQKCKIvdp","7":"1MAORQqvhgCPo_pWXLghDi-WQQ_O8SbSM","8":"1UVlLDyAU0iz_fIHw1k2jqhk252hoioPt","9":"1sP7o3hlPlKvkAf1hcINUGKYImwwX7-CE","10":"1uJUNjk2L0K0ilDxW5hi2oSUYQBIOldRd","11":"1QLBdzOc7EHDWfg1shBvU0BF_WQRT1U9I","12":"1uR0QXk1CgrMCz08EQKxnCqEoItMu5_na","13":"17OwybwoadK3iXyyHnE2kWD2Qu491H334","14":"1G4_yEWuWXS7mQE_3Ro5YDne6_DbOS6ME","15":"1LJqU_uSvM1VYRg_V_ktpy88FjNXYdn_-","16":"15jxESyciyLi6pALLZt1PqhitU7Kzl-4O","17":"1ZQj3RE-oU17mKjCkCs5jYstjxWgWWRZ3","18":"1arb6YcxnX7DB0hPHr_oBEzZ2XnFv_Yjr","19":"1Z2R45Ar0iF-DKnDWAIknReENvCEcJh1q","R":"1LyDPXrBoNEkMlxWwtjOW05wbczQp0wmA"};
+function linkFor(fn){fn=fn||'';var m=fn.match(/^\s*(\d+)/);var k=m?String(+m[1]):(/resumen/i.test(fn)?'R':null);return k&&LINKS[k]?'https://drive.google.com/file/d/'+LINKS[k]+'/view':null;}
+function prettyName(fn){return (fn||'Documento').replace(/\.pdf$/i,'').replace(/_compressed/i,'').replace(/^\s*\d+\s*[-.]\s*/,'').replace(/\s+/g,' ').trim();}
+var PROMPT="IDIOMA Y ACENTO (prioridad máxima, aplica a cada palabra que digas):\nEres mexicana, nacida y formada en la Ciudad de México. Hablas español de México con acento chilango profesional, como una inmunóloga mexicana dando una plática en un congreso en el WTC o en el Centro Banamex.\n- Entonación mexicana: melodía suave, final de frase ligeramente ascendente y relajado, ritmo pausado. Nada de entonación rioplatense, chilena, colombiana, caribeña ni española.\n- Seseo: la \"c\" y la \"z\" suenan como \"s\". La \"ll\" y la \"y\" suenan como en México, nunca \"sh\" ni \"zh\". La \"s\" final se pronuncia completa, no se aspira.\n- Trato: \"usted\" con el médico, o \"tú\" si él te tutea. JAMÁS \"vos\", \"tenés\", \"querés\", \"mirá\", \"podés\" ni ningún voseo. Nunca \"vosotros\".\n- Vocabulario mexicano natural: \"claro que sí\", \"con mucho gusto\", \"fíjese que…\", \"a ver, le platico\", \"¿le parece?\", \"ahorita le muestro\". Di \"computadora\", \"celular\", \"platicar\".\n- Prohibido: \"che\", \"bárbaro\", \"dale\", \"re-\", \"boludo\", \"genial\" con tono argentino, \"vale\", \"tío\", \"chévere\", \"parcero\".\nEjemplos de cómo suenas:\n· \"Claro que sí, doctor. Fíjese que en el estudio de Nieto, de 2022, los niños con sibilancias recurrentes tuvieron menos episodios. Los resultados a detalle aparecen aquí en pantalla.\"\n· \"Con mucho gusto. A ver, le platico cómo actúa MV130…\"\n· \"Eso, fíjese, no lo tengo en mis estudios. ¿Lo planteamos de otra forma?\"\n\nQUIÉN ERES:\nEres la Dra. Clara Laguardia, asesora científica en inmunología bacteriana, microbiota e infecciones respiratorias. Conversas con médicos tratantes, de colega a colega: tono profesional, cálido y sereno.\n\nCÓMO RESPONDES:\n- 2 a 5 frases, claras y con fundamento.\n- Toda afirmación clínica (eficacia, cifras, poblaciones, mecanismo, seguridad, edades, posología) la tomas EXCLUSIVAMENTE del resultado de la herramienta search_corpus. Nunca de memoria. Antes de responder cualquier pregunta científica o clínica sobre Bacmune o MV130, llama a search_corpus.\n- Si search_corpus devuelve evidencia: responde con ella, menciona brevemente de qué estudio sale (autor y año) y cierra con \"Los resultados a detalle aparecen aquí en pantalla.\"\n- Si no devuelve evidencia: di \"No tengo evidencia sobre eso en mis estudios. ¿Lo planteamos de otra forma?\" Nunca inventes ni completes.\n- Tu único producto es Bacmune (MV130). Si preguntan por otro producto, marca o medicamento (por ejemplo Solvopret, Pidotimod, lisados bacterianos de otras marcas o antibióticos), NO llames a search_corpus: di con amabilidad \"eso está fuera de mi alcance; yo le puedo platicar de la evidencia de Bacmune\" y ofrece lo que sí cubres.\n- Saludos y charla casual: responde breve y natural, sin buscar.\n- No des dosis ni esquemas personalizados para un paciente. No digas \"consulte a su médico\". No compares contra otros productos ni nombres a la competencia.\n\nAl iniciar, saluda en una frase con acento mexicano (\"Hola, doctor, qué gusto saludarle…\") y ofrece ayuda con la evidencia de Bacmune.\nTranscripción: interpreta \"vacmun\", \"bacmiun\", \"bacmun\", \"vacmune\", \"bagmune\" o \"bacmune\" como Bacmune (MV130).";
+
+var VOZ=(new URLSearchParams(location.search).get('voz')||'').toLowerCase();
+var pc=null,dc=null,stream=null,audioEl=null,live=false,lastUser='';
+function setState(s,cls){$('st').textContent=s;var st=$('stage');st.classList.remove('thinking');if(cls)st.classList.add(cls);}
+function speaking(on){$('stage').classList.toggle('speaking',!!on);}
+function send(o){try{dc.send(JSON.stringify(o));}catch(e){}}
+function txLine(who,t){if(!t)return;$('txBox').style.display='block';var d=document.createElement('div');d.innerHTML='<b>'+who+':</b> ';d.appendChild(document.createTextNode(t));$('tx').appendChild(d);$('tx').scrollTop=1e6;}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function card(q,res){$('intro').style.display='none';var el=document.createElement('div');
+  if(!res.evidence){el.className='ev none';el.innerHTML='<div class="k">Sin evidencia en el corpus</div><div class="q">'+esc(q)+'</div><div class="a">Esta pregunta no tiene respaldo en los 20 estudios aprobados. Clara no responde con datos que no estén ahí.</div>';}
+  else{var seen={},src='';(res.results||[]).forEach(function(r){var key=r.filename;if(seen[key])return;seen[key]=1;var u=linkFor(r.filename);
+      src+=(u?'<a href="'+u+'" target="_blank">':'<a>')+'<b>'+esc(prettyName(r.filename))+'</b><em>“'+esc((r.text||'').replace(/\s+/g,' ').slice(0,220))+'…”</em>'+(u?'<span class="open">Abrir estudio ↗</span>':'')+'</a>';});
+    el.className='ev';el.innerHTML='<div class="k">Evidencia · estudios aprobados</div><div class="q">'+esc(q)+'</div><div class="a">'+esc(res.answer)+'</div><div class="src">'+src+'</div>';}
+  $('feed').appendChild(el);}
+async function onEvent(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}var t=d.type||'';
+  if(t==='conversation.item.input_audio_transcription.completed'){lastUser=d.transcript||'';txLine('Médico',lastUser);}
+  else if(t==='response.output_audio_transcript.done'||t==='response.audio_transcript.done')txLine('Clara',d.transcript);
+  else if(t==='output_audio_buffer.started'||t==='response.output_audio_transcript.delta'||t==='response.audio_transcript.delta'){speaking(true);setState('Hablando');}
+  else if(t==='output_audio_buffer.stopped'||t==='output_audio_buffer.cleared'){speaking(false);setState(muted?'Micrófono apagado':'Escuchando');}
+  else if(t==='response.function_call_arguments.done'&&d.name==='search_corpus'){
+    var args={};try{args=JSON.parse(d.arguments||'{}');}catch(x){}var q=args.query||lastUser;setState('Buscando en los estudios…','thinking');
+    var res;try{var r=await fetch(API+'/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});res=await r.json();if(!r.ok)throw new Error((res.error&&res.error.message)||r.status);}
+    catch(err){res={evidence:false,answer:'',results:[],error:String(err.message||err)};$('msg').textContent='Búsqueda: '+res.error;}
+    card(lastUser||q,res);
+    send({type:'conversation.item.create',item:{type:'function_call_output',call_id:d.call_id,output:JSON.stringify(res.evidence?{evidencia:res.answer,estudios:(res.results||[]).map(function(x){return prettyName(x.filename);})}:{evidencia:null,nota:'Sin evidencia en el corpus aprobado.'})}});
+    send({type:'response.create'});setState('Escuchando');}
+  else if(t==='error'){$('msg').textContent='OpenAI: '+((d.error&&d.error.message)||'error');}
+}
+$('start').onclick=async function(){
+  if(!API){$('msg').textContent='Falta conectar el servidor.';return;}
+  this.disabled=true;$('msg').textContent='';setState('Conectando…');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+    var r=await fetch(API+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:'clara',instructions:PROMPT,voice:VOZ||undefined})});
+    if(r.status===403)throw new Error('el puente aún no autoriza esta dirección');var j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||('servidor '+r.status));
+    var ek=j.value||(j.client_secret&&j.client_secret.value);
+    pc=new RTCPeerConnection();audioEl=new Audio();audioEl.autoplay=true;pc.ontrack=function(ev){audioEl.srcObject=ev.streams[0];};
+    stream.getTracks().forEach(function(tr){pc.addTrack(tr,stream);});
+    dc=pc.createDataChannel('oai-events');dc.onmessage=onEvent;dc.onopen=function(){send({type:'response.create'});};
+    var offer=await pc.createOffer();await pc.setLocalDescription(offer);
+    var ans=await fetch('https://api.openai.com/v1/realtime/calls?model=gpt-realtime',{method:'POST',body:offer.sdp,headers:{'Authorization':'Bearer '+ek,'Content-Type':'application/sdp'}});
+    if(!ans.ok)throw new Error('No se pudo abrir la llamada ('+ans.status+')');
+    await pc.setRemoteDescription({type:'answer',sdp:await ans.text()});
+    live=true;$('stage').classList.add('live');setState('Escuchando');$('start').style.display='none';$('stop').style.display='inline-block';$('mute').style.display='inline-block';setMute(false);
+  }catch(err){stop();$('msg').textContent='No se pudo iniciar: '+err.message;}
+  this.disabled=false;
+};
+function stop(){live=false;speaking(false);$('stage').classList.remove('live','thinking');setState('Lista');
+  try{dc&&dc.close();}catch(e){}try{pc&&pc.close();}catch(e){}if(stream)stream.getTracks().forEach(function(t){t.stop();});pc=dc=stream=null;
+  $('start').style.display='inline-block';$('stop').style.display='none';$('mute').style.display='none';}
+$('stop').onclick=stop;
+var muted=false;
+function setMute(m){muted=m;if(stream)stream.getAudioTracks().forEach(function(t){t.enabled=!m;});var b=$('mute');b.classList.toggle('muted',m);b.textContent=m?'🔇 Micrófono apagado':'🎙 Silenciar';$('stage').classList.toggle('muted',m);if(m){$('st').textContent='Micrófono apagado';send({type:'input_audio_buffer.clear'});}else if(live)$('st').textContent='Escuchando';}
+$('mute').onclick=function(){setMute(!muted);};
+var pending=null;
+function ask(q){lastUser=q;txLine('Médico',q);send({type:'conversation.item.create',item:{type:'message',role:'user',content:[{type:'input_text',text:q}]}});send({type:'response.create'});}
+[].forEach.call(document.querySelectorAll('.chips span'),function(c){c.onclick=function(){var q=c.textContent;if(live&&dc&&dc.readyState==='open')ask(q);else{pending=q;$('start').click();}};});
+setInterval(function(){if(pending&&live&&dc&&dc.readyState==='open'){var q=pending;pending=null;setTimeout(function(){ask(q);},2500);}},400);
+})();
+</script></body></html>
