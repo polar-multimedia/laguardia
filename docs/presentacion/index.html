@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dra. Clara Laguardia · Presentación para Bacmune</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#071722;--card:#0e2331;--card2:#0b1d29;--line:rgba(255,255,255,.12);--c:#51c4ca;--c2:rgba(81,196,202,.14);--y:#e8e038;--s:#c9dce3;--d:#9fb8c2}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:#fff;font-family:Manrope,system-ui,sans-serif;font-weight:500;overflow:hidden}
+#view{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#deck{width:1920px;height:1080px;position:relative;transform-origin:center center;flex:none}
+.slide{position:absolute;inset:0;padding:96px 120px 120px;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .45s ease;
+  background:radial-gradient(1200px 700px at 85% -10%,rgba(81,196,202,.13),transparent 60%),var(--bg)}
+.slide.on{opacity:1;pointer-events:auto}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:56px}
+.top img{height:58px}
+.kicker{font-size:22px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--c)}
+h1{font-size:72px;font-weight:800;line-height:1.08;letter-spacing:-.01em}
+h2{font-size:56px;font-weight:800;line-height:1.12;letter-spacing:-.01em;margin-bottom:18px}
+.lead{font-size:30px;line-height:1.5;color:var(--s);font-weight:500;max-width:1250px}
+.grid{display:grid;gap:28px;margin-top:52px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:36px 36px 38px}
+.card h3{font-size:30px;font-weight:700;line-height:1.25;margin-bottom:14px}
+.card p{font-size:24px;line-height:1.5;color:var(--s)}
+.num{display:inline-flex;width:46px;height:46px;border-radius:50%;background:var(--c2);color:var(--c);font-weight:800;font-size:24px;align-items:center;justify-content:center;margin-bottom:16px}
+/* portada */
+.cover{display:grid;grid-template-columns:1fr 520px;gap:90px;align-items:center;flex:1}
+.cover .who{margin-top:34px;font-size:28px;color:var(--s);line-height:1.5;max-width:900px}
+.cover .tags{display:flex;gap:14px;margin-top:44px;flex-wrap:wrap}
+.tag{border:1px solid rgba(81,196,202,.45);color:#fff;border-radius:999px;padding:12px 22px;font-size:22px;font-weight:700}
+.portrait{height:820px;border-radius:32px;overflow:hidden;border:2px solid rgba(81,196,202,.55);box-shadow:0 0 70px rgba(81,196,202,.22);position:relative}
+.portrait video,.portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.portrait .nm{position:absolute;left:0;right:0;bottom:0;padding:90px 30px 28px;background:linear-gradient(transparent,rgba(7,23,34,.95));font-weight:800;font-size:30px}
+.portrait .nm small{display:block;font-size:20px;font-weight:600;color:var(--s);margin-top:4px}
+/* flujo */
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:64px;align-items:stretch}
+.step{position:relative;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:34px 28px;margin-right:46px}
+.step:last-child{margin-right:0}
+.step:not(:last-child)::after{content:"";position:absolute;right:-38px;top:50%;width:30px;height:2px;background:var(--c)}
+.step:not(:last-child)::before{content:"";position:absolute;right:-40px;top:calc(50% - 6px);border:7px solid transparent;border-left:10px solid var(--c)}
+.step .who{font-size:18px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c);margin-bottom:14px}
+.step h3{font-size:27px;font-weight:700;line-height:1.3;margin-bottom:12px}
+.step p{font-size:21px;line-height:1.5;color:var(--s)}
+.step.hl{border-color:rgba(232,224,56,.5)}.step.hl .who{color:var(--y)}
+.note{margin-top:48px;font-size:24px;color:var(--s);line-height:1.5;border-left:4px solid var(--c);padding-left:24px;max-width:1500px}
+/* captura */
+.shot{flex:1;display:flex;gap:56px;align-items:center;margin-top:8px}
+.shot img{width:1180px;border-radius:22px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.callouts{display:flex;flex-direction:column;gap:30px}
+.co b{display:block;font-size:26px;font-weight:700;margin-bottom:8px}
+.co span{font-size:22px;color:var(--s);line-height:1.45}
+.co{border-left:4px solid var(--c);padding-left:22px}
+/* corpus */
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:44px}
+.th{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 30px}
+.th h3{font-size:26px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;gap:18px}
+.th h3 em{font-style:normal;color:var(--c);font-size:22px;font-weight:800}
+.th li{list-style:none;font-size:20px;line-height:1.5;color:var(--s);padding-left:16px;position:relative}
+.th li::before{content:"";position:absolute;left:0;top:13px;width:6px;height:6px;border-radius:50%;background:var(--c)}
+/* candados */
+.locks{display:grid;grid-template-columns:1fr 1fr;gap:22px 28px;margin-top:48px}
+.lock{display:flex;gap:24px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 32px}
+.lock i{flex:none;width:46px;height:46px;border-radius:12px;background:var(--c2);display:flex;align-items:center;justify-content:center}
+.lock i svg{width:24px;height:24px;stroke:var(--c);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.lock b{display:block;font-size:26px;font-weight:700;margin-bottom:6px}
+.lock span{font-size:21px;color:var(--s);line-height:1.45}
+.quote{margin-top:6px;font-size:21px;color:var(--y);font-weight:600}
+/* pasos */
+.btn{display:inline-flex;align-items:center;gap:12px;margin-top:34px;background:var(--c);color:#071722;font-weight:800;font-size:24px;border-radius:999px;padding:18px 34px;text-decoration:none;align-self:flex-start}
+/* nav */
+.foot{position:absolute;left:120px;right:120px;bottom:44px;display:flex;justify-content:space-between;align-items:center;font-size:18px;color:var(--d);font-weight:600}
+#nav{position:fixed;right:22px;bottom:18px;display:flex;gap:8px;z-index:5}
+#nav button{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(14,35,49,.85);color:#fff;font:800 20px Manrope;cursor:pointer}
+#nav button:hover{border-color:var(--c)}
+#bar{position:fixed;left:0;top:0;height:4px;background:var(--c);transition:width .4s;z-index:5}
+</style></head><body>
+<div id="bar"></div>
+<div id="view"><div id="deck">
+
+<!-- 1 -->
+<section class="slide on">
+  <div class="top"><img src="../bacmune.png" alt="Bacmune"><span class="kicker">Asesora científica virtual</span></div>
+  <div class="cover">
+    <div>
+      <h1>Dra. Clara Laguardia</h1>
+      <p class="who">Una asesora científica que conversa con el médico, de colega a colega, y responde únicamente con los estudios aprobados de Bacmune (MV130). Cada respuesta aparece en pantalla con su fuente.</p>
+      <div class="tags"><span class="tag">Voz en tiempo real</span><span class="tag">20 estudios aprobados</span><span class="tag">Evidencia con fuente</span><span class="tag">Español de México</span></div>
+    </div>
+    <div class="portrait"><video src="../listens.mp4" poster="../poster.jpg" autoplay loop muted playsinline></video><div class="nm">Dra. Clara Laguardia<small>Inmunología bacteriana e infecciones respiratorias</small></div></div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="top"><span class="kicker">El punto de partida</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>El médico pregunta en el momento. La respuesta tiene que estar respaldada.</h2>
+  <p class="lead">La evidencia de Bacmune es sólida, pero vive en 20 artículos científicos. En una visita o en un congreso, nadie tiene tiempo de abrirlos.</p>
+  <div class="grid g3">
+    <div class="card"><span class="num">1</span><h3>Preguntas puntuales</h3><p>¿Cómo actúa? ¿Qué hay en pediatría? ¿Y en EPOC? ¿Es seguro en inmunodeprimidos? Cada médico llega con su propia duda.</p></div>
+    <div class="card"><span class="num">2</span><h3>Evidencia dispersa</h3><p>Los datos están en estudios en inglés y en español, con diseños y poblaciones distintas. Encontrar el dato exacto toma tiempo.</p></div>
+    <div class="card"><span class="num">3</span><h3>Cero margen de error</h3><p>En comunicación médica, una afirmación sin respaldo es un riesgo. Lo que se dice tiene que poder citarse.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="top"><span class="kicker">Qué es Clara</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>Una colega que conoce cada estudio y nunca habla de más</h2>
+  <p class="lead">Clara es un avatar de voz. El médico le habla con naturalidad y ella contesta con la evidencia de Bacmune, mientras la pantalla muestra de qué estudio sale cada dato.</p>
+  <div class="grid g4">
+    <div class="card"><h3>Conversa por voz</h3><p>Sin teclear y sin menús. Con tono profesional y cálido, en español de México.</p></div>
+    <div class="card"><h3>Busca en los estudios</h3><p>Antes de afirmar cualquier dato clínico, consulta los 20 estudios aprobados.</p></div>
+    <div class="card"><h3>Muestra la fuente</h3><p>La respuesta aparece en pantalla con el fragmento del estudio y el enlace para abrirlo.</p></div>
+    <div class="card"><h3>Reconoce sus límites</h3><p>Si un dato no está en los estudios, lo dice. No inventa ni completa.</p></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="top"><span class="kicker">Cómo funciona</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>De la pregunta a la evidencia en segundos</h2>
+  <div class="flow">
+    <div class="step"><div class="who">Médico</div><h3>Hace su pregunta en voz alta</h3><p>"¿Qué evidencia hay en niños con sibilancias?"</p></div>
+    <div class="step"><div class="who">Clara</div><h3>Entiende y decide</h3><p>Si es una pregunta científica, no responde de memoria: va a los estudios.</p></div>
+    <div class="step hl"><div class="who">Corpus</div><h3>Busca en los 20 estudios</h3><p>Encuentra los pasajes relevantes. Si no hay respaldo, la respuesta es "sin evidencia".</p></div>
+    <div class="step"><div class="who">Clara</div><h3>Responde con su voz</h3><p>En 2 a 5 frases, menciona el estudio de origen y remite a la pantalla.</p></div>
+    <div class="step"><div class="who">Pantalla</div><h3>Muestra la evidencia</h3><p>Resumen, fragmentos textuales de los estudios y botón para abrir cada uno.</p></div>
+  </div>
+  <p class="note">Clara funciona en el navegador, en una tablet, una laptop o una pantalla de stand. No requiere instalar nada; solo micrófono y conexión a internet.</p>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="top"><span class="kicker">Clara en acción</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <div class="shot">
+    <img src="clara-en-accion.jpg" alt="Clara respondiendo una pregunta sobre sibilancias en niños, con la evidencia en pantalla">
+    <div class="callouts">
+      <div class="co"><b>Respuesta real del sistema</b><span>Pregunta sobre sibilancias recurrentes en niños, contestada con los estudios de Bacmune.</span></div>
+      <div class="co"><b>Conversación transcrita</b><span>Lo que dice el médico y lo que responde Clara aparece por escrito en pantalla.</span></div>
+      <div class="co"><b>Fuentes visibles</b><span>Cada respuesta muestra el fragmento citado y abre el estudio completo.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <div class="top"><span class="kicker">El respaldo</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>20 estudios aprobados, y nada más</h2>
+  <p class="lead">Clara solo conoce lo que Bacmune aprueba. Su conocimiento es este corpus.</p>
+  <div class="themes">
+    <div class="th"><h3>Mecanismo e inmunidad entrenada <em>8</em></h3><ul><li>Brandi 2022 · Cirauqui 2018</li><li>Angulo Villavicencio 2020 · Guevara Hoyer 2020</li><li>Bodas Pinedo 2023 · Jiménez 2024</li><li>Lycke 2012 · París 2021</li></ul></div>
+    <div class="th"><h3>Infecciones respiratorias recurrentes <em>5</em></h3><ul><li>Alecsandru 2011</li><li>Sánchez Ramón 2020 · Sánchez Ramón 2021</li><li>Montalbán Hernández 2024 (niños y adultos)</li><li>García-González 2019 (amigdalitis recurrente)</li></ul></div>
+    <div class="th"><h3>Pediatría: sibilancias recurrentes <em>2</em></h3><ul><li>Nieto 2021 (ensayo aleatorizado, doble ciego)</li><li>Nieto 2022</li></ul></div>
+    <div class="th"><h3>EPOC <em>1</em></h3><ul><li>Conejero 2021 (ensayo fase III)</li></ul></div>
+    <div class="th"><h3>Pacientes inmunodeprimidos <em>2</em></h3><ul><li>Ochoa Grullón 2021 (deficiencia de células B)</li><li>Pérez-Sancristóbal 2023 (autoinmunes)</li></ul></div>
+    <div class="th"><h3>SARS-CoV-2 y resumen <em>2</em></h3><ul><li>del Fresno 2021</li><li>Resumen bibliográfico de Bacmune</li></ul></div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <div class="top"><span class="kicker">Candados</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>Diseñada para no salirse del guion científico</h2>
+  <div class="locks">
+    <div class="lock"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><div><b>Solo dice lo que está en los estudios</b><span>Toda cifra, población o resultado sale del corpus aprobado, nunca de memoria.</span></div></div>
+    <div class="lock"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg></i><div><b>Reconoce cuando no sabe</b><span>Si no hay respaldo, lo dice y propone replantear la pregunta.</span><div class="quote">"No tengo evidencia sobre eso en mis estudios."</div></div></div>
+    <div class="lock"><i><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></i><div><b>Solo habla de Bacmune</b><span>No responde sobre otros productos, no compara y no nombra a la competencia.</span></div></div>
+    <div class="lock"><i><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg></i><div><b>Sin indicaciones personalizadas</b><span>No da dosis ni esquemas para un paciente concreto.</span></div></div>
+    <div class="lock"><i><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></i><div><b>Conexión protegida</b><span>Las llaves de acceso viven en un servidor seguro y nunca llegan al navegador del usuario.</span></div></div>
+    <div class="lock"><i><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></i><div><b>Corpus controlado</b><span>Agregar o retirar un estudio es decisión de Bacmune; nada entra al corpus sin su aprobación.</span></div></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="top"><span class="kicker">Dónde vive Clara</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>Un mismo agente, cuatro escenarios</h2>
+  <div class="grid g2">
+    <div class="card"><h3>Stand en congreso</h3><p>Pantalla vertical con Clara en tamaño real. El médico se acerca, pregunta y se lleva la evidencia que le interesa.</p></div>
+    <div class="card"><h3>Visita médica</h3><p>El representante abre a Clara en su tablet cuando surge una pregunta que merece el dato exacto y su fuente.</p></div>
+    <div class="card"><h3>Acceso directo para médicos</h3><p>Un enlace exclusivo para que el médico consulte la evidencia de Bacmune cuando la necesite, desde cualquier dispositivo.</p></div>
+    <div class="card"><h3>Capacitación de fuerza de ventas</h3><p>Los representantes practican las preguntas difíciles y aprenden a ubicar cada dato en su estudio.</p></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide" style="padding-bottom:130px">
+  <div class="top" style="margin-bottom:40px"><span class="kicker">Siguientes pasos</span><img src="../bacmune.png" alt="Bacmune"></div>
+  <h2>Lo que sigue para llevar a Clara a campo</h2>
+  <div class="grid g2" style="margin-top:36px">
+    <div class="card"><span class="num">1</span><h3>Acceso exclusivo para médicos</h3><p>Validación con cédula profesional ante el registro de la SEP, más un código de invitación personal entregado por el representante.</p></div>
+    <div class="card"><span class="num">2</span><h3>Voz y personalidad definitivas</h3><p>Selección de voz con Bacmune y ajuste del estilo de conversación para cada escenario.</p></div>
+    <div class="card"><span class="num">3</span><h3>Tablero de preguntas</h3><p>Registro de qué preguntan los médicos y qué estudios se consultan, para alimentar la estrategia médica y comercial.</p></div>
+    <div class="card"><span class="num">4</span><h3>Revisión regulatoria</h3><p>Validación del flujo y del corpus con el área médica y regulatoria de Bacmune antes del lanzamiento.</p></div>
+  </div>
+  <a class="btn" href="../" target="_blank">Hablar con Clara ↗</a>
+</section>
+
+</div></div>
+<div id="nav"><button id="prev" aria-label="Anterior">‹</button><button id="next" aria-label="Siguiente">›</button></div>
+<script>
+(function(){
+var slides=[].slice.call(document.querySelectorAll('.slide')),i=0,deck=document.getElementById('deck');
+slides.forEach(function(s,n){var f=document.createElement('div');f.className='foot';f.innerHTML='<span>Dra. Clara Laguardia · Bacmune (MV130) · '+(n+1)+' / '+slides.length+'</span>';s.appendChild(f);});
+function fit(){var k=Math.min(innerWidth/1920,innerHeight/1080);deck.style.transform='scale('+k+')';}
+function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides[i].classList.remove('on');i=n;slides[i].classList.add('on');
+  document.getElementById('bar').style.width=((i+1)/slides.length*100)+'%';try{history.replaceState(null,'','#'+(i+1));}catch(e){}}
+addEventListener('resize',fit);fit();
+addEventListener('keydown',function(e){if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>-1){e.preventDefault();go(i+1);}if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>-1){e.preventDefault();go(i-1);}if(e.key==='Home')go(0);if(e.key==='End')go(slides.length-1);});
+document.getElementById('next').onclick=function(){go(i+1);};document.getElementById('prev').onclick=function(){go(i-1);};
+var x0=null;addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+addEventListener('touchend',function(e){if(x0===null)return;var dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>50)go(i+(dx<0?1:-1));x0=null;});
+function fromHash(){var h=parseInt((location.hash||'').slice(1),10);if(h>0&&h-1!==i)go(h-1);}
+addEventListener('hashchange',fromHash);fromHash();go(i);
+})();
+</script>
+</body></html>
