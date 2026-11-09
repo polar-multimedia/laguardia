@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acceso · Dra. Clara Laguardia</title>
+<meta name="robots" content="noindex">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#071722;--card:#0e2331;--line:rgba(255,255,255,.12);--c:#51c4ca;--s:#c9dce3;--d:#9fb8c2;--e:#ff7a85}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:#fff;font-family:Manrope,system-ui,sans-serif;font-weight:500}
+body{background:radial-gradient(900px 500px at 85% 0%,rgba(81,196,202,.13),transparent 60%),var(--bg)}
+header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+header img{height:48px}header .t{font-weight:800;font-size:16px}header .t small{display:block;font-weight:600;font-size:13px;color:var(--d)}
+main{max-width:520px;margin:0 auto;padding:36px 16px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:28px 24px}
+h1{font-size:24px;font-weight:800;margin:0 0 8px}
+p{color:var(--s);line-height:1.55;margin:0 0 18px;font-size:16px}
+label{display:block;font-weight:700;font-size:14px;margin:16px 0 6px}
+input[type=text],input[type=email],input[type=tel]{width:100%;font:600 17px Manrope;color:#fff;background:#081a26;border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;outline:none}
+input:focus{border-color:var(--c)}
+.code{font-size:28px!important;letter-spacing:.35em;text-align:center}
+.chk{display:flex;gap:12px;align-items:flex-start;margin-top:18px;font-size:14px;color:var(--s);line-height:1.5}
+.chk input{margin-top:4px;width:18px;height:18px;accent-color:var(--c);flex:none}
+button{width:100%;margin-top:22px;border:0;border-radius:999px;padding:15px 20px;font:800 17px Manrope;background:var(--c);color:#071722;cursor:pointer}
+button:disabled{opacity:.5}
+.link{background:none;color:var(--c);padding:8px;margin-top:10px;font-size:15px}
+.msg{min-height:20px;margin-top:14px;font-size:14px;font-weight:600;color:var(--e)}
+.ok{color:var(--c)}
+.hint{font-size:13px;color:var(--d);margin-top:6px}
+.hide{display:none}
+.badge{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--c);margin-bottom:10px}
+</style></head><body>
+<header><img src="../bacmune.png" alt="Bacmune"><div class="t">Dra. Clara Laguardia<small>Acceso exclusivo para profesionales de la salud</small></div></header>
+<main>
+  <!-- Registro con invitación -->
+  <div class="card hide" id="vReg">
+    <div class="badge">Invitación personal</div>
+    <h1 id="regTitle">Bienvenida, doctora</h1>
+    <p>Tu representante de Bacmune te invitó a conversar con la Dra. Clara Laguardia. Regístrate una sola vez; después entrarás con un código que llega a tu correo.</p>
+    <label for="rName">Nombre completo</label><input type="text" id="rName" autocomplete="name">
+    <label for="rCed">Cédula profesional</label><input type="tel" id="rCed" inputmode="numeric" maxlength="8" placeholder="Ej. 12345678"><div class="hint">La validamos contra el Registro Nacional de Profesionistas de la SEP.</div>
+    <label for="rEsp">Especialidad</label><input type="text" id="rEsp" placeholder="Ej. Pediatría, Neumología, Medicina general">
+    <label for="rMail">Correo electrónico</label><input type="email" id="rMail" autocomplete="email">
+    <label class="chk"><input type="checkbox" id="rOk"><span>Confirmo que soy profesional de la salud y acepto que mis datos se usen para validar mi acceso a esta herramienta.</span></label>
+    <button id="rGo">Registrarme</button>
+    <div class="msg" id="rMsg"></div>
+  </div>
+
+  <!-- Entrada con correo -->
+  <div class="card hide" id="vLogin">
+    <h1>Entrar</h1>
+    <p>Escribe el correo con el que te registraste y te enviaremos un código de acceso.</p>
+    <label for="lMail">Correo electrónico</label><input type="email" id="lMail" autocomplete="email">
+    <button id="lGo">Enviarme un código</button>
+    <div class="msg" id="lMsg"></div>
+    <p class="hint" style="margin-top:18px">¿Aún no tienes acceso? Pide a tu representante de Bacmune tu invitación personal.</p>
+  </div>
+
+  <!-- Código -->
+  <div class="card hide" id="vCode">
+    <h1>Revisa tu correo</h1>
+    <p id="cTxt">Te enviamos un código de 6 dígitos. Vence en 10 minutos.</p>
+    <label for="cCode">Código</label><input type="tel" id="cCode" class="code" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+    <button id="cGo">Entrar</button>
+    <button class="link" id="cAgain">Enviar otro código</button>
+    <div class="msg" id="cMsg"></div>
+  </div>
+</main>
+<script src="../config.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i);};
+var API=(window.CLARA_API||'').replace(/\/$/,'');
+var q=new URLSearchParams(location.search), invite=(q.get('i')||'').toUpperCase(), email='';
+function store(k,v){try{v?localStorage.setItem(k,v):localStorage.removeItem(k);}catch(e){}}
+function show(v){['vReg','vLogin','vCode'].forEach(function(x){$(x).classList.toggle('hide',x!==v);});}
+function msg(id,t,ok){$(id).textContent=t||'';$(id).classList.toggle('ok',!!ok);}
+async function call(path,body){var r=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var j={};try{j=await r.json();}catch(e){}if(!r.ok)throw new Error((j.error&&j.error.message)||('Error '+r.status));return j;}
+async function busy(btn,fn){btn.disabled=true;try{await fn();}finally{btn.disabled=false;}}
+
+if(invite){
+  show('vReg');
+  call('/med/invite',{invite:invite}).then(function(j){
+    $('rName').value=j.doctor_name||'';
+    var n=(j.doctor_name||'').trim();
+    $('regTitle').textContent=n?('Bienvenido(a), '+n):'Bienvenido(a)';
+  }).catch(function(e){show('vLogin');msg('lMsg',e.message);});
+}else show('vLogin');
+
+$('rGo').onclick=function(){busy(this,async function(){
+  msg('rMsg','');
+  email=$('rMail').value.trim();
+  try{await call('/med/register',{invite:invite,name:$('rName').value,cedula:$('rCed').value,specialty:$('rEsp').value,email:email,accept:$('rOk').checked});
+    $('cTxt').textContent='Te enviamos un código de 6 dígitos a '+email+'. Vence en 10 minutos.';show('vCode');$('cCode').focus();}
+  catch(e){msg('rMsg',e.message);}
+});};
+$('lGo').onclick=function(){busy(this,async function(){
+  msg('lMsg','');email=$('lMail').value.trim();
+  try{await call('/med/request',{email:email});$('cTxt').textContent='Te enviamos un código de 6 dígitos a '+email+'. Vence en 10 minutos.';show('vCode');$('cCode').focus();}
+  catch(e){msg('lMsg',e.message);}
+});};
+$('cGo').onclick=function(){busy(this,async function(){
+  msg('cMsg','');
+  try{var j=await call('/med/verify',{email:email,code:$('cCode').value.trim()});store('clara_token',j.token);msg('cMsg','Listo, entrando…',true);location.href='../';}
+  catch(e){msg('cMsg',e.message);}
+});};
+$('cCode').addEventListener('keydown',function(e){if(e.key==='Enter')$('cGo').click();});
+$('cAgain').onclick=function(){busy(this,async function(){
+  try{await call('/med/request',{email:email});msg('cMsg','Te enviamos un código nuevo.',true);}catch(e){msg('cMsg',e.message);}
+});};
+})();
+</script>
+</body></html>
