@@ -9,6 +9,9 @@ body{background:radial-gradient(1000px 600px at 80% 0%,rgba(81,196,202,.12),tran
 header{display:flex;align-items:center;gap:18px;padding:16px 28px;border-bottom:1px solid var(--line)}
 header img{height:64px}header .t{font-weight:800;font-size:17px}header .t small{display:block;font-weight:600;font-size:13px;color:var(--d)}
 header .sp{flex:1}
+.user{font-size:13px;color:var(--s);text-align:right;line-height:1.45}.user b{color:#fff;font-weight:800}.user a{color:var(--c);font-weight:700;cursor:pointer;text-decoration:none}
+.wm{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden;opacity:.06;font-weight:800;font-size:15px;color:#fff;transform:rotate(-24deg) scale(1.6);display:flex;flex-wrap:wrap;gap:46px 70px;align-content:center;justify-content:center}
+body.gate main,body.gate .foot{visibility:hidden}
 main{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:28px;padding:24px 28px;max-width:1440px;margin:0 auto}
 @media(max-width:900px){main{grid-template-columns:1fr}}
 @media(max-width:560px){header img{height:44px}header{padding:14px 16px}}
@@ -46,8 +49,9 @@ main{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:28px;padding
 .tx b{color:var(--s)}
 #feed{display:flex;flex-direction:column-reverse;gap:16px}
 .foot{color:var(--d);font-size:12px;text-align:center;padding:4px 0 22px}
-</style></head><body>
-<header><img src="bacmune.png" alt="Bacmune"><div class="t">Dra. Clara Laguardia<small>Asesora científica · responde solo con los estudios aprobados</small></div><div class="sp"></div></header>
+</style></head><body class="gate">
+<div class="wm" id="wm"></div>
+<header><img src="bacmune.png" alt="Bacmune"><div class="t">Dra. Clara Laguardia<small>Asesora científica · responde solo con los estudios aprobados</small></div><div class="sp"></div><div class="user" id="user"></div></header>
 <main>
   <div><div class="stage" id="stage"><video id="vL" poster="poster.jpg" autoplay loop muted playsinline><source src="listens.webm" type="video/webm"><source src="listens.mp4" type="video/mp4"></video><video id="vS" autoplay loop muted playsinline><source src="speaks.webm" type="video/webm"><source src="speaks.mp4" type="video/mp4"></video>
     <div class="badge"><i></i><span id="st">Lista</span></div>
@@ -67,6 +71,18 @@ main{display:grid;grid-template-columns:minmax(300px,430px) 1fr;gap:28px;padding
 (function(){
 var $=function(i){return document.getElementById(i);};
 var API=(window.CLARA_API||'').replace(/\/$/,'');
+function lsGet(k){try{return localStorage.getItem(k)||'';}catch(e){return '';}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
+var TOKEN=lsGet('clara_token')||lsGet('clara_rep_token');
+function toLogin(){lsDel('clara_token');lsDel('clara_rep_token');location.replace('acceso/');}
+if(!TOKEN){toLogin();return;}
+fetch(API+'/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN})}).then(function(r){return r.json().then(function(j){if(!r.ok)throw j;return j;});}).then(function(me){
+  var label=me.kind==='med'?(me.name+' · Cédula '+me.cedula):(me.name||me.email)+' · Representante';
+  var u=document.getElementById('user');u.innerHTML='<b></b><br><a id="logout">Salir</a>';u.querySelector('b').textContent=label;
+  document.getElementById('logout').onclick=function(){fetch(API+'/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN})}).finally(toLogin);};
+  var wm=document.getElementById('wm'),t='';for(var n=0;n<60;n++)t+='<span></span>';wm.innerHTML=t;[].forEach.call(wm.children,function(sp){sp.textContent=label;});
+  document.body.classList.remove('gate');
+}).catch(function(){toLogin();});
 var LINKS={"1":"1YSOJ97nAvCyJQ3LP80xASSfxwsS9Gc68","2":"1IhGqQmmt1kkRi9Tx1stCrlD3kOJRKWmI","3":"1b4yMiFlqNZQR--_1JTA-EM16vZO2A5LP","4":"1cEIO8lxE6yPMOID-6ZSa71HhbgGRUi-8","5":"1MoES-nleaDLytL_Scd4XWr_nw6DkzdBV","6":"1StjeOWHH22jjWaUaHx5xRT2IQKCKIvdp","7":"1MAORQqvhgCPo_pWXLghDi-WQQ_O8SbSM","8":"1UVlLDyAU0iz_fIHw1k2jqhk252hoioPt","9":"1sP7o3hlPlKvkAf1hcINUGKYImwwX7-CE","10":"1uJUNjk2L0K0ilDxW5hi2oSUYQBIOldRd","11":"1QLBdzOc7EHDWfg1shBvU0BF_WQRT1U9I","12":"1uR0QXk1CgrMCz08EQKxnCqEoItMu5_na","13":"17OwybwoadK3iXyyHnE2kWD2Qu491H334","14":"1G4_yEWuWXS7mQE_3Ro5YDne6_DbOS6ME","15":"1LJqU_uSvM1VYRg_V_ktpy88FjNXYdn_-","16":"15jxESyciyLi6pALLZt1PqhitU7Kzl-4O","17":"1ZQj3RE-oU17mKjCkCs5jYstjxWgWWRZ3","18":"1arb6YcxnX7DB0hPHr_oBEzZ2XnFv_Yjr","19":"1Z2R45Ar0iF-DKnDWAIknReENvCEcJh1q","R":"1LyDPXrBoNEkMlxWwtjOW05wbczQp0wmA"};
 function linkFor(fn){fn=fn||'';var m=fn.match(/^\s*(\d+)/);var k=m?String(+m[1]):(/resumen/i.test(fn)?'R':null);return k&&LINKS[k]?'https://drive.google.com/file/d/'+LINKS[k]+'/view':null;}
 function prettyName(fn){return (fn||'Documento').replace(/\.pdf$/i,'').replace(/_compressed/i,'').replace(/^\s*\d+\s*[-.]\s*/,'').replace(/\s+/g,' ').trim();}
@@ -92,7 +108,7 @@ async function onEvent(e){var d;try{d=JSON.parse(e.data);}catch(x){return;}var t
   else if(t==='output_audio_buffer.stopped'||t==='output_audio_buffer.cleared'){speaking(false);setState(muted?'Micrófono apagado':'Escuchando');}
   else if(t==='response.function_call_arguments.done'&&d.name==='search_corpus'){
     var args={};try{args=JSON.parse(d.arguments||'{}');}catch(x){}var q=args.query||lastUser;setState('Buscando en los estudios…','thinking');
-    var res;try{var r=await fetch(API+'/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q})});res=await r.json();if(!r.ok)throw new Error((res.error&&res.error.message)||r.status);}
+    var res;try{var r=await fetch(API+'/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:q,token:TOKEN})});res=await r.json();if(r.status===401){toLogin();return;}if(!r.ok)throw new Error((res.error&&res.error.message)||r.status);}
     catch(err){res={evidence:false,answer:'',results:[],error:String(err.message||err)};$('msg').textContent='Búsqueda: '+res.error;}
     card(lastUser||q,res);
     send({type:'conversation.item.create',item:{type:'function_call_output',call_id:d.call_id,output:JSON.stringify(res.evidence?{evidencia:res.answer,estudios:(res.results||[]).map(function(x){return prettyName(x.filename);})}:{evidencia:null,nota:'Sin evidencia en el corpus aprobado.'})}});
@@ -104,7 +120,7 @@ $('start').onclick=async function(){
   this.disabled=true;$('msg').textContent='';setState('Conectando…');
   try{
     stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
-    var r=await fetch(API+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:'clara',instructions:PROMPT,voice:VOZ||undefined})});
+    var r=await fetch(API+'/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:'clara',instructions:PROMPT,voice:VOZ||undefined,token:TOKEN})});if(r.status===401){toLogin();return;}
     if(r.status===403)throw new Error('el puente aún no autoriza esta dirección');var j=await r.json();if(!r.ok)throw new Error((j.error&&j.error.message)||('servidor '+r.status));
     var ek=j.value||(j.client_secret&&j.client_secret.value);
     pc=new RTCPeerConnection();audioEl=new Audio();audioEl.autoplay=true;pc.ontrack=function(ev){audioEl.srcObject=ev.streams[0];};
