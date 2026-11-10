@@ -1,7 +1,7 @@
 // Puente seguro con OpenAI para los agentes de Polar (Dr. G y Clara Laguardia) · Cloudflare Worker v4
 // v4: acceso solo para médicos invitados y representantes (códigos por correo), invitaciones QR, bitácora y tickets.
 // Secretos/variables en Cloudflare: OPENAI_API_KEY, RESEND_API_KEY (secretos), base D1 enlazada como DB.
-// Variables opcionales: REP_DOMAINS (ej. "empresa.com.mx,polarmultimedia.com"), TICKET_EMAIL, MAIL_FROM.
+// Variables opcionales: REP_DOMAINS (por defecto carnot.com y polarmultimedia.com), TICKET_EMAIL, MAIL_FROM.
 // La llave de OpenAI y la de correo nunca llegan al navegador.
 
 const ORIGINS = ['https://robcarpinteyro.github.io', 'https://polar-multimedia.github.io'];
@@ -10,7 +10,7 @@ const STORE_ID = 'vs_6a6d0cbc935881918902afc7d9078b38';
 const VOICES = { drg: 'cedar', clara: 'coral' };
 const CLARA_VOICES = ['marin', 'coral', 'shimmer', 'sage', 'ballad', 'alloy'];
 const SITE = 'https://polar-multimedia.github.io/laguardia/';
-const DEFAULT_REP_DOMAINS = 'polarmultimedia.com';
+const DEFAULT_REP_DOMAINS = 'carnot.com,polarmultimedia.com';
 const DEFAULT_FROM = 'Dra. Clara Laguardia <clara@polarmultimedia.com>';
 const CODE_MIN = 10;          // vigencia del código por correo (minutos)
 const SESSION_H = 12;         // vigencia de la sesión (horas)
