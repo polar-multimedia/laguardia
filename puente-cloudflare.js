@@ -1,5 +1,6 @@
 // Puente seguro con OpenAI para los agentes de Polar (Dr. G y Clara Laguardia) · Cloudflare Worker v4
 // v4: acceso solo para médicos invitados y representantes (códigos por correo), invitaciones QR, bitácora y tickets.
+// v4.1: pase de demo para la versión sin marca de las presentaciones (claude-made/evidencia), sin registro y con tope diario.
 // Secretos/variables en Cloudflare: OPENAI_API_KEY, RESEND_API_KEY (secretos), base D1 enlazada como DB.
 // Variables opcionales: REP_DOMAINS (por defecto carnot.com y polarmultimedia.com), TICKET_EMAIL, MAIL_FROM.
 // La llave de OpenAI y la de correo nunca llegan al navegador.
@@ -15,6 +16,10 @@ const DEFAULT_FROM = 'Dra. Clara Laguardia <clara@polarmultimedia.com>';
 const CODE_MIN = 10;          // vigencia del código por correo (minutos)
 const SESSION_H = 12;         // vigencia de la sesión (horas)
 const INVITE_H = 72;          // vigencia de la invitación QR (horas)
+// Pase de demo (v4.1): solo Clara, sin registro, con topes por día (hora UTC)
+const DEMO_SESSIONS_IP = 6;   // conversaciones por IP al día
+const DEMO_SEARCH_IP = 60;    // búsquedas por IP al día
+const DEMO_SESSIONS_DAY = 200; // conversaciones de demo al día en total
 let storeId = STORE_ID;
 let schemaReady = false;
 
@@ -57,10 +62,25 @@ async function schema(db) {
     db.prepare('CREATE TABLE IF NOT EXISTS invites (code TEXT PRIMARY KEY, rep_email TEXT, doctor_name TEXT, created INTEGER, expires INTEGER, used_by TEXT, used_at INTEGER)'),
     db.prepare("CREATE TABLE IF NOT EXISTS doctors (email TEXT PRIMARY KEY, name TEXT, cedula TEXT, specialty TEXT, invite_code TEXT, rep_email TEXT, created INTEGER, verified_at INTEGER, cedula_status TEXT DEFAULT 'pendiente', last_login INTEGER)"),
     db.prepare('CREATE TABLE IF NOT EXISTS questions (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, kind TEXT, email TEXT, question TEXT, evidence INTEGER, sources TEXT, ticket_sent INTEGER DEFAULT 0)'),
-    db.prepare('CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, kind TEXT, email TEXT, event TEXT, detail TEXT)')
+    db.prepare('CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, ts INTEGER, kind TEXT, email TEXT, event TEXT, detail TEXT)'),
+    db.prepare('CREATE TABLE IF NOT EXISTS demo_usage (day TEXT, ip TEXT, kind TEXT, n INTEGER DEFAULT 0, PRIMARY KEY(day, ip, kind))')
   ]);
   schemaReady = true;
 }
+// Cuenta y limita el uso del pase de demo. Devuelve la identidad 'demo' o null si se pasó del tope.
+async function demoPass(db, req, kind) {
+  const day = new Date().toISOString().slice(0, 10);
+  const ip = (await sha(req.headers.get('CF-Connecting-IP') || 'sin-ip')).slice(0, 16);
+  const mine = await db.prepare('SELECT n FROM demo_usage WHERE day=? AND ip=? AND kind=?').bind(day, ip, kind).first();
+  if ((mine ? mine.n : 0) >= (kind === 'session' ? DEMO_SESSIONS_IP : DEMO_SEARCH_IP)) return null;
+  if (kind === 'session') {
+    const all = await db.prepare("SELECT COALESCE(SUM(n),0) AS t FROM demo_usage WHERE day=? AND kind='session'").bind(day).first();
+    if ((all ? all.t : 0) >= DEMO_SESSIONS_DAY) return null;
+  }
+  await db.prepare('INSERT INTO demo_usage (day, ip, kind, n) VALUES (?,?,?,1) ON CONFLICT(day, ip, kind) DO UPDATE SET n = n + 1').bind(day, ip, kind).run();
+  return { kind: 'demo', email: 'demo:' + ip };
+}
+const DEMO_LIMIT = 'La demo de Clara llegó a su límite por hoy. Vuelve a intentarlo mañana.';
 const logEvent = (db, kind, email, event, detail) =>
   db.prepare('INSERT INTO events (ts, kind, email, event, detail) VALUES (?,?,?,?,?)').bind(now(), kind || '', email || '', event, detail ? String(detail).slice(0, 1000) : '').run();
 
@@ -252,7 +272,8 @@ export default {
         const agent = body.agent === 'clara' ? 'clara' : 'drg';
         let who = null;
         if (agent === 'clara') {
-          const s = await getSession(db, body.token);
+          let s = await getSession(db, body.token);
+          if (!s && body.demo === true) { s = await demoPass(db, req, 'session'); if (!s) return err(DEMO_LIMIT, 429, h); }
           if (!s) return err('Necesitas iniciar sesión para hablar con Clara.', 401, h);
           who = s; await logEvent(db, s.kind, s.email, 'conversacion_iniciada');
         }
@@ -267,7 +288,8 @@ export default {
 
       // ================= BÚSQUEDA EN EL CORPUS =================
       if (path === '/search') {
-        const s = await getSession(db, body.token);
+        let s = await getSession(db, body.token);
+        if (!s && body.demo === true) { s = await demoPass(db, req, 'search'); if (!s) return err(DEMO_LIMIT, 429, h); }
         if (!s) return err('Necesitas iniciar sesión.', 401, h);
         const id = await findStore(auth);
         if (!id) return err('El corpus todavía no está cargado.', 503, h);
@@ -293,7 +315,7 @@ export default {
         // Bitácora de la pregunta y ticket si no hubo evidencia
         const sources = [...new Set(out.results.map(x => x.filename))].join(' | ');
         const ins = await db.prepare('INSERT INTO questions (ts, kind, email, question, evidence, sources) VALUES (?,?,?,?,?,?)').bind(now(), s.kind, s.email, q, noEv ? 0 : 1, sources).run();
-        if (noEv && env.TICKET_EMAIL) {
+        if (noEv && env.TICKET_EMAIL && s.kind !== 'demo') {
           ctx.waitUntil((async () => {
             try {
               const w = await whoAmI(db, s);
